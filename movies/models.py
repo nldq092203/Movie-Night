@@ -6,6 +6,13 @@ from datetime import timedelta
 
 UserModel = get_user_model()
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(UserModel, on_delete=models.CASCADE, related_name="profile")
+    bio = models.TextField()
+
+    def __str__(self):
+        return f"{self.__class__.__name__} object for {self.user}"
+
 class Genre(models.Model):
     class Meta:
         ordering = ["name"]
@@ -35,9 +42,10 @@ class Movie(models.Model):
     runtime_minutes = models.PositiveIntegerField(null=True)
     genres = models.ManyToManyField(Genre, related_name="movies")
     plot = models.TextField()
-    country = models.CharField()
+    country = models.TextField()
     imdb_rating = models.FloatField()
     url_poster = models.URLField()
+    is_full_record = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.title} ({self.year})"

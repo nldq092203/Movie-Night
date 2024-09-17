@@ -1,0 +1,6 @@
+asgiref==3.8.1
+dj-database-url==2.2.0
+Django==4.2.16
+django-configurations==2.5.1
+sqlparse==0.5.1
+typing_extensions==4.12.2
