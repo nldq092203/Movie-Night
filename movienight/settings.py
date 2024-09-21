@@ -47,8 +47,8 @@ class Dev(Configuration):
         'movies',
         'rest_framework',
         'rest_framework_simplejwt',
+        'drf_spectacular',
         'djoser',
-        'drf_yasg'
     ]
 
     MIDDLEWARE = [
@@ -130,6 +130,7 @@ class Dev(Configuration):
     OMDB_KEY = "e1406b6f"
     
     REST_FRAMEWORK = {
+        "DEFAULT_SCHEMA_CLASS": 'drf_spectacular.openapi.AutoSchema',
         "DEFAULT_AUTHENTICATION_CLASSES": [
             "rest_framework.authentication.BasicAuthentication",
             "rest_framework.authentication.SessionAuthentication",
@@ -140,7 +141,7 @@ class Dev(Configuration):
             "rest_framework.permissions.IsAuthenticated",
         ],
         "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-        "PAGE_SIZE": 50
+        "PAGE_SIZE": 50,
     }
     DJOSER = {
         "USER_ID_FIELD": "email",
@@ -160,13 +161,28 @@ class Dev(Configuration):
     CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]  # Front-end port
     CORS_ALLOW_CREDENTIALS = True # Credentials (cookies, authorization headers) can be included in cross-origin requests
 
-    #Swagger UI
-    SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {
-        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"},
-        "Basic": {"type": "basic"},
+    SPECTACULAR_SETTINGS = {
+        "TITLE": "Movie Night",
+        'DESCRIPTION': 'API for Movie Night',
+        'VERSION': '1.0.0',
+        'SECURITY': [
+            {'BearerAuth': []},
+            {'BasicAuth': []},
+            ],
+        'SECURITY_SCHEMES': {
+            'BearerAuth': {
+                'type': 'http',               
+                'scheme': 'bearer',           
+                'bearerFormat': 'JWT',        
+                'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer <token>"',
+            },
+            'BasicAuth': {
+                'type': 'http',
+                'scheme': 'basic',
+                'description': 'Basic authentication with username and password.'
+            },
+        },
     }
-}
 
 
 class Prod(Dev):

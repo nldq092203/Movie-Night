@@ -16,18 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
 from django.urls import re_path
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Movie Night API",
-        default_version="v1",
-        description="API for Movie Night Blog",
-    ),
-    public=True,
-)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,17 +26,7 @@ urlpatterns = [
     path("auth/token/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="jwt_refresh"),
     path("api/v1/", include("movies.urls")),
-    re_path(
-        r"^swagger(?P<format>\.json|\.yaml)$",
-        schema_view.without_ui(cache_timeout=0),
-        name="schema-json",
-    ),
-    re_path(  
-        r"^swagger/$",  
-        schema_view.with_ui("swagger", cache_timeout=0),  
-        name="schema-swagger-ui",  
-    ),  
-    re_path(  
-        r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"  
-    ),  
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
