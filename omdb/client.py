@@ -68,6 +68,20 @@ class OmdbMovie:
     @property
     def url_poster(self):
         return self.data["Poster"]
+    
+    def to_dict(self):
+        """Convert all attributes to a dictionary."""
+        return {
+            "imdb_id": self.imdb_id,
+            "title": self.title,
+            "year": self.year,
+            "runtime_minutes": self.runtime_minutes,
+            "genres": self.genres,
+            "plot": self.plot,
+            "country": self.country,
+            "imdb_rating": self.imdb_rating,
+            "url_poster": self.url_poster,
+        }
 
 
 class OmdbClient:

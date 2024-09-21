@@ -11,23 +11,30 @@ class GenreSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
+        fields = ["imdb_id", "title", "year"]
+
+class GenreField(serializers.StringRelatedField):
+    def to_internal_value(self, data):
+        try:
+            # Fetch or create a genre object based on the provided genre name
+            genre, created = Genre.objects.get_or_create(name=data.lower())
+            return genre  # Return the Genre instance
+        except (TypeError, ValueError):
+            self.fail(f"Genre value '{data}' is invalid")
+
+
+class MovieDetailSerializer(serializers.ModelSerializer):
+    genres = GenreField(many=True)  # Handling multiple genres
+
+    class Meta:
+        model = Movie
         fields = "__all__"
 
-class MovieDetailSerializer(MovieSerializer):
     def update(self, instance, validated_data):
-        instance.title = validated_data.get("title", instance.title)
-        instance.year = validated_data.get("year", instance.year)
-        instance.runtime_minutes = validated_data.get("runtime_minutes", instance.runtime_minutes)
-        instance.genres.clear()
-        for genre_name in validated_data.get("genres", []):
-            genre, created = Genre.objects.get_or_create(name=genre_name)
-            instance.genre.add(genre)
-        instance.plot = validated_data("plot", instance.plot)
-        instance.country = validated_data("country", instance.country)
-        instance.imbd_rating = validated_data("imdb_rating", instance.imdb_rating)
-        instance.url_poster = validated_data("url_poster", instance.url_poster)
+        instance = super(MovieDetailSerializer, self).update(instance, validated_data)
         instance.is_full_record = True
         instance.save()
+
         return instance
 
 class SearchTermSerializer(serializers.ModelSerializer):
@@ -46,7 +53,7 @@ class MovieNightSerializer(serializers.ModelSerializer):
 
 class MovieNightInvitationSerializer(serializers.ModelSerializer):
     invitee = serializers.HyperlinkedRelatedField(
-        queryset=User.onjects.all(), view_name="api_user_detail", lookup_field="email"
+        queryset=User.objects.all(), view_name="api_user_detail", lookup_field="email"
     )
 
     movie_night = serializers.HyperlinkedRelatedField(

@@ -43,15 +43,18 @@ class Dev(Configuration):
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
+        'corsheaders',
         'movies',
         'rest_framework',
         'rest_framework_simplejwt',
-        'djoser'
+        'djoser',
+        'drf_yasg'
     ]
 
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -133,18 +136,37 @@ class Dev(Configuration):
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework_simplejwt.authentication.JWTAuthentication"
         ],
+        "DEFAULT_PERMISSION_CLASSES": [
+            "rest_framework.permissions.IsAuthenticated",
+        ],
+        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+        "PAGE_SIZE": 50
     }
     DJOSER = {
         "USER_ID_FIELD": "email",
         "LOGIN_FIELD": "email",
-        # "SEND_ACTIVATION_EMAIL": True,
-        # "ACTIVATION": True,
-        # "ACTIVATION_URL": 'auth/users/activate/{uid}/{token}/',
+        "SEND_ACTIVATION_EMAIL": True,
+        "ACTIVATION_URL": 'auth/users/activate/{uid}/{token}/',
+        "PASSWORD_RESET_CONFIRM_URL": 'auth/password/reset/confirm/{uid}/{token}/',
+        "PASSWORD_RESET_CONFIRM_RETYPE": True,
+        "USER_CREATE_PASSWORD_RETYPE": True
     }
     SIMPLE_JWT = {
-        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5)
+        'ACCESS_TOKEN_LIFETIME': timedelta(days=2)
     }
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+    # CORS
+    CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]  # Front-end port
+    CORS_ALLOW_CREDENTIALS = True # Credentials (cookies, authorization headers) can be included in cross-origin requests
+
+    #Swagger UI
+    SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"},
+        "Basic": {"type": "basic"},
+    }
+}
 
 
 class Prod(Dev):

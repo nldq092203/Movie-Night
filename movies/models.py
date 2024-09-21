@@ -43,7 +43,7 @@ class Movie(models.Model):
     genres = models.ManyToManyField(Genre, related_name="movies")
     plot = models.TextField()
     country = models.TextField()
-    imdb_rating = models.FloatField()
+    imdb_rating = models.FloatField(default=0)
     url_poster = models.URLField()
     is_full_record = models.BooleanField(default=False)
 

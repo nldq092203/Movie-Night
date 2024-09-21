@@ -29,7 +29,9 @@ def fill_movie_details(movie):
     omdb_client = get_client_from_settings()
     movie_details = omdb_client.get_by_imdb_id(movie.imdb_id)
 
-    serializer = MovieDetailSerializer(instance=movie, data=movie_details)
+    logger.warning(movie_details.to_dict())
+
+    serializer = MovieDetailSerializer(instance=movie, data=movie_details.to_dict())
     if serializer.is_valid():
         serializer.save()
     else:
@@ -46,10 +48,10 @@ def search_and_save(search):
 
     search_term, created = SearchTerm.objects.get_or_create(term=normalized_search_term)
 
-    if not created and (search_term.last_search > now() - timedelta(days=1)):
+    if not created and (search_term.last_search > now() - timedelta(days=2)):
         # Don't search as it has been searched recently
         logger.warning(
-            "Search for '%s' was performed in the past 24 hours so not searching again.",
+            "Search for '%s' was performed in the past 48 hours so not searching from omdb_api again.",
             normalized_search_term,
         )
         return
@@ -61,8 +63,8 @@ def search_and_save(search):
         movie, created = Movie.objects.get_or_create(
             imdb_id=omdb_movie.imdb_id,
             defaults={
-                "title": omdb_movie.title,
-                "year": omdb_movie.year,
+                "title": omdb_movie.title,  # Set attributes in defaults if a new Movie is created
+                "year": omdb_movie.year,                   
             },
         )
 
