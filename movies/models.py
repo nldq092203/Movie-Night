@@ -22,6 +22,11 @@ class Genre(models.Model):
     def __str__(self):
         return self.name
     
+    def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.lower()
+        super(Genre, self).save(*args, **kwargs)
+    
 class SearchTerm(models.Model):
     class Meta:
         ordering = ["term"]
@@ -31,6 +36,11 @@ class SearchTerm(models.Model):
 
     def __str__(self):
         return self.term
+    
+    def save(self, *args, **kwargs):
+        if self.term:
+            self.term = self.term.lower()
+        super(SearchTerm, self).save(*args, **kwargs)
     
 class Movie(models.Model):
     class Meta:

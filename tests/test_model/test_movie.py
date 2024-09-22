@@ -1,3 +1,7 @@
+"""
+Test cases for Movie model. Verify movie creation with unique imdb_id
+"""
+
 import pytest
 from movies.models import Movie, Genre
 from django.db import IntegrityError
@@ -19,3 +23,7 @@ class TestMovie:
     def test_movie_unique_imdb_id(self):
         with pytest.raises(IntegrityError):
             MovieFactory( imdb_id='tt1375666')
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

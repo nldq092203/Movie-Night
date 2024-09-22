@@ -1,3 +1,7 @@
+"""
+Test cases for MoviNightInvitation model.
+"""
+
 import pytest
 from tests.factories import MovieNightInvitationFactory
 from movies.models import MovieNightInvitation
@@ -15,3 +19,7 @@ class TestMovieNightInvitation:
         assert self.invitation.movie_night is not None
         assert self.invitation.invitee is not None
         assert not self.invitation.attendance_confirmed
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

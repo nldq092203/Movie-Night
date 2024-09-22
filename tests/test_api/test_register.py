@@ -321,5 +321,5 @@ class TestUserManagementAPI:
 
 
 """
-Author: NGUYEN Le Diem Quynh lnguye220903@gmail.com
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
 """

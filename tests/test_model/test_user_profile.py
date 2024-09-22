@@ -1,3 +1,7 @@
+"""
+Test cases for UseProfile model
+"""
+
 import pytest
 from django.contrib.auth import get_user_model
 from movies.models import UserProfile
@@ -13,3 +17,8 @@ def test_userprofile_creation():
     assert profile.user == user
     assert profile.bio == 'This is a test bio.'
     assert str(profile) == f"UserProfile object for {user}"
+
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

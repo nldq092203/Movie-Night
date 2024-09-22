@@ -1,3 +1,7 @@
+"""
+Functions to interact with the OMDb API and manage movie-related data in the local database.
+"""
+
 import logging 
 import re
 from movies.models import Genre, SearchTerm, Movie
@@ -72,3 +76,7 @@ def search_and_save(search):
             logger.info("Movie created: '%s'", movie.title)
 
     search_term.save()
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

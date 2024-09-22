@@ -7,6 +7,14 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = "__all__"
 
+    def validate_name(self, value):
+        """
+        Ensure the genre name is always in lowercase and is unique (case-insensitive).
+        """
+        value_lower = value.lower()
+        if Genre.objects.filter(name__iexact=value_lower).exists():
+            raise serializers.ValidationError(f"The genre '{value}' already exists.")
+        return value_lower
 
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,31 +45,61 @@ class MovieDetailSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def validate_year(self, value):
+        """
+        Ensure the year is a positive integer.
+        """
+        if value <= 0:
+            raise serializers.ValidationError("Year must be a positive integer.")
+        return value
+
+
 class SearchTermSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchTerm
         fields = "__all__"
 
+    def validate_name(self, value):
+        """
+        Ensure the search term is always in lowercase.
+        """
+        return value.lower()
+
 class MovieNightSerializer(serializers.ModelSerializer):
-    author = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(), view_name="api_user_detail", lookup_field="email"
-    )
+    creator = serializers.EmailField()  # Use the email field for both reading and writing
 
     class Meta:
         model = MovieNight
         fields = "__all__"
 
-class MovieNightInvitationSerializer(serializers.ModelSerializer):
-    invitee = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(), view_name="api_user_detail", lookup_field="email"
-    )
+    def validate_creator(self, value):
+        """
+        Ensure the creator is a valid user identified by their email.
+        """
+        try:
+            # Find the user by their email during deserialization
+            return User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError(f"User with email {value} does not exist.")
 
-    movie_night = serializers.HyperlinkedRelatedField(
-        queryset=MovieNight.objects.all(), view_name="api_movienight_detail", lookup_field="email"
-    )
+
+
+class MovieNightInvitationSerializer(serializers.ModelSerializer):
+    invitee = serializers.EmailField()  # Use email for both deserialization and serialization
+
     class Meta:
         model = MovieNightInvitation
         fields = "__all__"
 
-    
+    def validate_invitee(self, value):
+        """
+        Ensure the invitee is a valid user identified by their email.
+        """
+        try:
+            # Look up the User object by email
+            return User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError(f"User with email {value} does not exist.")
+
+
     

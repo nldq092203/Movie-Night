@@ -1,8 +1,11 @@
+"""
+Defines factories for generating test data corresponding to models.
+"""
 import factory
 from factory.django import DjangoModelFactory
 from django.contrib.auth import get_user_model
 from movies.models import UserProfile, Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation
-
+from django.utils import timezone 
 UserModel = get_user_model()
 
 class UserFactory(DjangoModelFactory):
@@ -33,6 +36,7 @@ class SearchTermFactory(DjangoModelFactory):
         model = SearchTerm
 
     term = factory.Faker('word')
+    last_search = factory.LazyFunction(timezone.now)
 
 
 class MovieFactory(DjangoModelFactory):
@@ -80,3 +84,8 @@ class MovieNightInvitationFactory(DjangoModelFactory):
     invitee = factory.SubFactory(UserFactory)
     attendance_confirmed = False
     is_attending = False
+
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

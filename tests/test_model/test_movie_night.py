@@ -1,3 +1,7 @@
+"""
+Test cases for MoviNight model.
+"""
+
 import pytest
 from tests.factories import MovieNightFactory
 from movies.models import MovieNight
@@ -15,3 +19,6 @@ class TestMovieNight:
         assert self.movienight.movie is not None
         assert self.movienight.creator is not None
 
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""
