@@ -71,7 +71,7 @@ class TestUserRegistrationAPI:
     
     def test_register_user_existed(self, api_client):
         """ Test with email existed"""
-        user = UserFactory.create()
+        user = UserFactory()
 
         payload = {
             "email": user.email,
@@ -177,7 +177,7 @@ class TestUserManagementAPI:
     @pytest.fixture(autouse=True)
     def setup(self):
         """Automatically set up user for each test"""
-        self.user = UserFactory.create(
+        self.user = UserFactory(
             email="testuser@example.com",
             password="defaultpassword",
             is_active=False 

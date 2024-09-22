@@ -58,6 +58,7 @@ class MovieDetailView(RetrieveAPIView):
         movie_detail = self.get_object()
         try:
             fill_movie_details(movie_detail)
+
         except Exception as e:
             return Response(
                 {"error": "An unexpected error occurred."},

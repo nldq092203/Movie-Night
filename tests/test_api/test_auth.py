@@ -17,7 +17,7 @@ class TestLoginAPI:
     @pytest.fixture(autouse=True)
     def setup(self):
         """Automatically set up user for each test"""
-        self.user = UserFactory.create(
+        self.user = UserFactory(
             email="testuser@example.com",
             password="defaultpassword",
             is_active=True 
