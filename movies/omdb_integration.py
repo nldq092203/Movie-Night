@@ -46,7 +46,7 @@ def search_and_save(search):
     Perform a search for search_term against the API, but only if it hasn't been searched in the past 24 hours. Save
     each result to the local DB as a partial record.
     """
-
+    logger.warning("Here")
     # Replace multiple spaces with single spaces, and lowercase the search
     normalized_search_term = re.sub(r"\s+", " ", search.lower())
 

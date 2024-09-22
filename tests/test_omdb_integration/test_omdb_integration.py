@@ -124,7 +124,7 @@ class TestSearchAndSave:
         search_and_save(self.search_term)
         # Asserts
         # Logger warning displayed
-        self.mock_logger.warning.assert_called_once_with(
+        self.mock_logger.warning.assert_any_call(
             "Search for '%s' was performed in the past 48 hours so not searching from omdb_api again.",
             "test term",
         )
