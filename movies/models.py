@@ -90,7 +90,12 @@ class MovieNightInvitation(models.Model):
     invitee = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     attendance_confirmed = models.BooleanField(default=False)
     is_attending = models.BooleanField(default=False)
+    invited_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.movie_night} / {self.invitee.email}"
 
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

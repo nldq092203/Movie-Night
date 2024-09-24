@@ -1,6 +1,9 @@
+"""
+Test URL patterns and their corresponding views for the Movie
+"""
 import pytest
 from django.urls import reverse, resolve
-from movies.views import movie_search, MovieDetailView
+from movies.views import movie_search, MovieDetailView, MovieView
 
 @pytest.mark.django_db
 class TestMovieURLs:
@@ -15,3 +18,12 @@ class TestMovieURLs:
         """Test that the movie_detail URL resolves to the correct view."""
         url = reverse('movie_detail', kwargs={'pk': 'tt1375666'})
         assert resolve(url).func.view_class == MovieDetailView
+
+    def test_movie_list_url(self):
+        """Test that the movie_list URL resolves to the correct view."""
+        url = reverse('movie_list')
+        assert resolve(url).func.view_class == MovieView
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

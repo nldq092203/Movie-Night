@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation
+from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation, UserProfile
 from movienight_auth.models import User
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,8 +71,16 @@ class SearchTermSerializer(serializers.ModelSerializer):
         return value.lower()
 
 class MovieNightSerializer(serializers.ModelSerializer):
-    creator = serializers.EmailField()  # Use the email field for both reading and writing
+    creator = serializers.ReadOnlyField(source='creator.email') 
 
+    class Meta:
+        model = MovieNight
+        fields = ['id', 'start_time', 'creator', 'movie']
+
+class MovieNightDetailSerializer(serializers.ModelSerializer):
+    creator = serializers.ReadOnlyField(source='creator.email') 
+    pending_invitees = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
     class Meta:
         model = MovieNight
         fields = "__all__"
@@ -75,18 +88,46 @@ class MovieNightSerializer(serializers.ModelSerializer):
     def validate_creator(self, value):
         """
         Ensure the creator is a valid user identified by their email.
+        If the email doesn't correspond to an existing user, raise an error.
         """
         try:
-            # Find the user by their email during deserialization
             return User.objects.get(email=value)
         except User.DoesNotExist:
             raise serializers.ValidationError(f"User with email {value} does not exist.")
 
+    def get_participants(self, obj):
+        """ 
+        Get all invitees who have confirmed attendance.
+        This method returns a list of emails for users who have confirmed their attendance.
+        """
+        confirmed_invitees = MovieNightInvitation.objects.filter(
+            movie_night=obj, attendance_confirmed=True, is_attending=True
+        ).select_related('invitee')  # Optimized to load related users with one query
 
+        # Extract the emails of confirmed invitees
+        return [invitee.invitee.email for invitee in confirmed_invitees]
+
+    def get_pending_invitees(self, obj):
+        """
+        Get all invitees who haven't confirmed yet. Only return the pending invitees if 
+        the requesting user is the creator.
+        """
+        request = self.context.get('request')
+
+        # Ensure the user is the creator of the movie night
+        if request and obj.creator == request.user:
+            pending_invitees = MovieNightInvitation.objects.filter(
+                movie_night=obj, attendance_confirmed=False
+            ).select_related('invitee')
+
+            return [invitee.invitee.email for invitee in pending_invitees]
+
+        # If the user is not the creator, return an empty list or None
+        return []
 
 class MovieNightInvitationSerializer(serializers.ModelSerializer):
-    invitee = serializers.EmailField()  # Use email for both deserialization and serialization
-
+    invitee = serializers.EmailField()
+    invited_time = serializers.ReadOnlyField()
     class Meta:
         model = MovieNightInvitation
         fields = "__all__"
@@ -101,5 +142,27 @@ class MovieNightInvitationSerializer(serializers.ModelSerializer):
         except User.DoesNotExist:
             raise serializers.ValidationError(f"User with email {value} does not exist.")
 
+    def validate(self, data):
+        """
+        Check that the invitee and movie_night combination is unique.
+        """
+        invitee = data.get('invitee')
+        movie_night = data.get('movie_night')
 
+        # Ensure the combination of invitee and movie_night is unique
+        if MovieNightInvitation.objects.filter(invitee=invitee, movie_night=movie_night).exists():
+            raise serializers.ValidationError("This user has already been invited to this movie night.")
+        
+        return data
+
+    def create(self, validated_data):
+        """
+        Automatically set attendance_confirmed and is_attending to False if they are not provided in the request.
+        """
+        validated_data.setdefault('attendance_confirmed', False)
+        validated_data.setdefault('is_attending', False)
+        return super().create(validated_data)
     
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

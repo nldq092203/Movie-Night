@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from tests.factories import MovieFactory
 User = get_user_model()
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def api_client():
     """Fixture to provide an API client"""
     yield APIClient()
@@ -23,6 +23,10 @@ def authenticated_client(api_client, user):
     return api_client
 
 @pytest.fixture
+def any_client(api_client):
+    return api_client
+
+@pytest.fixture(scope="function")
 def sample_movie(db):
     """Creates a sample movie for testing"""
     return MovieFactory(imdb_id='tt1234567', title='Test Movie', year=2000)
