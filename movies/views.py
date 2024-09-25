@@ -27,7 +27,8 @@ from movies.serializers import (
     )
 from movies.models import Movie, MovieNight, MovieNightInvitation, Genre
 from django.contrib.auth import get_user_model
-from movies.omdb_integration import search_and_save, fill_movie_details
+from movies.tasks import search_and_save
+from movies.omdb_integration import fill_movie_details
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
@@ -42,60 +43,132 @@ from movies.permissions import MovieNightDetailPermission, MovieNightInvitationP
 from django.db.models import Q
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from celery.exceptions import TimeoutError
+from django.shortcuts import redirect
+import urllib.parse
+from django.urls import reverse
+from movienight.celery import app
+from rest_framework.views import APIView
+from celery.result import AsyncResult
+
 
 User = get_user_model()
 
 ############### Movie ###################
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def movie_search(request):
-    """
-    Search for movies based on a search term.
-    Parameters:
-    - request: The incoming HTTP request containing the search term.
+class MovieSearchView(APIView):
+    permission_classes = [AllowAny]
 
-    Returns:
-    - A paginated response containing movie data or an error message if an issue occurs.
-    """
-    # Extract the search term and ensure it exists
-    term = request.data.get("term", "").strip()  # Remove leading and trailing whitespace
+    def post(self, request):
+        """
+        Search for movies based on a search term.
+        - Initiates a background task using Celery.
+        - Returns a 302 (Founs) and redirects to a "wait" page while the task is processed.
+        - On completion, redirects to the results page.
+        """
 
-    # Check if term is present
-    if not term:
-        return Response(
-            {"error": "Search term is required."},
-            status=status.HTTP_400_BAD_REQUEST,
+        # Extract the search term and ensure it exists
+        term = request.data.get("term", "").strip()  # Remove leading and trailing whitespace
+
+        if not term:
+            return Response(
+                {"error": "Search term is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Dispatch the Celery task asynchronously
+            res = search_and_save.delay(term)
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while processing your request."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        try:
+            # Check if the task completes in 2 seconds, else redirect to "wait"
+            res.get(timeout=2)
+        except TimeoutError:
+            # Redirect to a wait page if the task is still running
+            return redirect(
+                reverse("movie_search_wait", args=(res.id,))
+                + "?search_term="
+                + urllib.parse.quote_plus(term)
+            )
+
+        # Redirect to the search results page if the task is completed quickly
+        return redirect(
+            reverse("movie_search_results")
+            + "?search_term="
+            + urllib.parse.quote_plus(term),
+            permanent=False,
         )
 
-    try:
-        search_and_save(term)
-    except Exception as e:
-        return Response(
-            {"error": "An error occurred while processing your request."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+
+class MovieSearchWaitView(APIView):
+    """
+    API view to handle pending search results from a Celery task.
+    """
+    permission_classes = [AllowAny]
+    
+    def get(self, request, result_uuid):
+        term = request.query_params.get("search_term", "").strip()
+        res = AsyncResult(result_uuid)
+
+        try:
+            res.get(timeout=-1)
+        except TimeoutError:
+            return Response(
+                {"message": "Task pending, please refresh."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return redirect(
+            reverse("movie_search_results")
+            + "?search_term="
+            + urllib.parse.quote_plus(term)
         )
     
-    movie_list = Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year')
+class MovieSearchResultsView(ListAPIView):
+    """
+    API view to return paginated search results based on the search term.
+    """
+    serializer_class = MovieSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = [AllowAny]
 
-    # Set up pagination
-    paginator = PageNumberPagination()
-    paginator.page_size = 50
-    result_page = paginator.paginate_queryset(movie_list, request)
+    def get(self, request, *args, **kwargs):
+        term = request.query_params.get("search_term", "").strip()
+        if not term:
+            return Response(
+                {"error": "Search term is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        movie_list = Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year')
 
-    # Serialize the paginated data
-    serializer = MovieSerializer(result_page, many=True)
+        # Check if there are any results
+        if not movie_list:
+            return Response(
+                {
+                    "results": [],
+                    "message": "No movies found matching your search term."
+                },
+                status=status.HTTP_200_OK,
+            )
 
-    # Check if the result page is empty
-    if not result_page:
-        return Response(
-            {
-                "results": [],
-                "message": "No movies found matching your search term."
-            },
-            status=status.HTTP_200_OK,
-        )
-    return paginator.get_paginated_response(serializer.data)
+        # Use the default pagination
+        page = self.paginate_queryset(movie_list)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
+        serializer = self.get_serializer(movie_list, many=True)
+        return Response(serializer.data)
+    
 class MovieDetailView(RetrieveAPIView):
     """
     Retrieve and update detailed information for a single movie.

@@ -49,6 +49,7 @@ class Dev(Configuration):
         'rest_framework_simplejwt',
         'drf_spectacular',
         'djoser',
+        "django_celery_results"
     ]
 
     MIDDLEWARE = [
@@ -137,18 +138,18 @@ class Dev(Configuration):
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework_simplejwt.authentication.JWTAuthentication"
         ],
-        "DEFAULT_THROTTLE_CLASSES": [
-            "movies.throttlings.AnonSustainedThrottle",
-            "movies.throttlings.AnonBurstThrottle",
-            "movies.throttlings.UserSustainedThrottle",
-            "movies.throttlings.UserBurstThrottle",
-        ],
-        "DEFAULT_THROTTLE_RATES": {
-            "anon_sustained": "500/day",
-            "anon_burst": "10/minute",
-            "user_sustained": "5000/day",
-            "user_burst": "100/minute",
-        },
+        # "DEFAULT_THROTTLE_CLASSES": [
+        #     "movies.throttlings.AnonSustainedThrottle",
+        #     "movies.throttlings.AnonBurstThrottle",
+        #     "movies.throttlings.UserSustainedThrottle",
+        #     "movies.throttlings.UserBurstThrottle",
+        # ],
+        # "DEFAULT_THROTTLE_RATES": {
+        #     "anon_sustained": "500/day",
+        #     "anon_burst": "10/minute",
+        #     "user_sustained": "5000/day",
+        #     "user_burst": "100/minute",
+        # },
         "DEFAULT_PERMISSION_CLASSES": [
             "rest_framework.permissions.IsAuthenticated",
         ],
@@ -200,6 +201,10 @@ class Dev(Configuration):
             },
         },
     }
+
+    # CELERY 
+    CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 
 class Prod(Dev):
