@@ -12,17 +12,17 @@ def api_client():
     """Fixture to provide an API client"""
     yield APIClient()
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def user(db):
     user = User.objects.create_user(email='testuser@gmail.com', password='testpass')
     return user
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def authenticated_client(api_client, user):
     api_client.force_authenticate(user=user)
     return api_client
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def any_client(api_client):
     return api_client
 

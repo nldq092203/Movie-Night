@@ -137,6 +137,18 @@ class Dev(Configuration):
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework_simplejwt.authentication.JWTAuthentication"
         ],
+        "DEFAULT_THROTTLE_CLASSES": [
+            "movies.throttlings.AnonSustainedThrottle",
+            "movies.throttlings.AnonBurstThrottle",
+            "movies.throttlings.UserSustainedThrottle",
+            "movies.throttlings.UserBurstThrottle",
+        ],
+        "DEFAULT_THROTTLE_RATES": {
+            "anon_sustained": "500/day",
+            "anon_burst": "10/minute",
+            "user_sustained": "5000/day",
+            "user_burst": "100/minute",
+        },
         "DEFAULT_PERMISSION_CLASSES": [
             "rest_framework.permissions.IsAuthenticated",
         ],
@@ -157,7 +169,8 @@ class Dev(Configuration):
         "USER_CREATE_PASSWORD_RETYPE": True
     }
     SIMPLE_JWT = {
-        'ACCESS_TOKEN_LIFETIME': timedelta(days=2)
+        'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
+        "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     }
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

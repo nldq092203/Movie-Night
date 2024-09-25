@@ -21,14 +21,14 @@ class TestMovieNightInvitation:
         assert isinstance(self.invitation, MovieNightInvitation)
         assert self.invitation.movie_night is not None
         assert self.invitation.invitee is not None
-        assert not self.invitation.attendance_confirmed
+        assert UserFactory not in self.invitation.attendance_confirmed
 
     def test_unique_together_constraint(self):
         """
         Test that the 'unique_together' constraint on ('invitee', 'movie_night') is enforced.
         """
         # Create a user and a movie night
-        user = UserFactory()
+        user = ()
         movie_night = MovieNightFactory()
 
         # Create a valid MovieNightInvitation

@@ -1,4 +1,3 @@
-
 """
 Test Cases for serialization and deserialization SearchTermSerializer.
 """
