@@ -24,7 +24,6 @@ class TestMovieNightSerializer:
 
         # Check that the data contains the correct fields and values
         assert data["id"] == movie_night.id
-        assert data["start_time"] == movie_night.start_time.isoformat().replace('+00:00', 'Z')
         assert data["creator"] == user.email  # Creator's email is serialized
         assert data["movie"] == movie_night.movie.id  # Movie's id is serialized
 

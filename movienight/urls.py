@@ -23,6 +23,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
+    path('auth/', include('allauth.urls')),
     path("auth/token/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="jwt_refresh"),
     path("api/v1/", include("movies.urls")),
