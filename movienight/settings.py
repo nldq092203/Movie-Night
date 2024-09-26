@@ -49,7 +49,8 @@ class Dev(Configuration):
         'rest_framework_simplejwt',
         'drf_spectacular',
         'djoser',
-        "django_celery_results"
+        "django_celery_results",
+        "django_celery_beat"
     ]
 
     MIDDLEWARE = [
@@ -68,7 +69,7 @@ class Dev(Configuration):
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
+            'DIRS': [os.path.join(BASE_DIR, "templates")],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
@@ -201,7 +202,7 @@ class Dev(Configuration):
             },
         },
     }
-
+    BASE_URL = "http://localhost:8000" 
     # CELERY 
     CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
     CELERY_BROKER_URL = "redis://localhost:6379/0"

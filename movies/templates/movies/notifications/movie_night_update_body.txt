@@ -1,0 +1,10 @@
+Hi,
+
+{{ movie_night.creator.email }} has updated start time to your Movie Night for
+{{ movie_night.movie.title }}.
+
+It will begin at {{start_time}} instead.
+To see the event, please visit {{movie_night_url}}
+
+Thanks,
+The Movie Night Team

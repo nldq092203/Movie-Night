@@ -1,0 +1,1 @@
+{{ movie_night.creator.email }} has updated the even {{movie_night.movie.title}} at {{movie_night.start_time}}
