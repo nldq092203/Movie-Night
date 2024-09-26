@@ -11,7 +11,7 @@
 - [Usage]
 - [API Documentation]
 - [Testing]
-- [Contact](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
+- [Contact]
 
 ## Features
 
