@@ -23,7 +23,8 @@ from movies.serializers import (
     MovieNightInvitationSerializer,
     MovieNightDetailSerializer,
     GenreSerializer, 
-    UserProfileSerializer
+    UserProfileSerializer,
+    MovieSearchSerializer
     )
 from movies.models import Movie, MovieNight, MovieNightInvitation, Genre
 from django.contrib.auth import get_user_model
@@ -51,10 +52,20 @@ from movienight.celery import app
 from rest_framework.views import APIView
 from celery.result import AsyncResult
 
+from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiParameter, OpenApiTypes
 
 User = get_user_model()
 
 ############### Movie ###################
+@extend_schema(
+    request=MovieSearchSerializer,
+    responses={
+        302: OpenApiTypes.STR,
+        400: OpenApiTypes.OBJECT,
+        500: OpenApiTypes.OBJECT,
+    },
+    description="Search for movies based on a search term.",
+)
 class MovieSearchView(APIView):
     permission_classes = [AllowAny]
 
@@ -62,18 +73,16 @@ class MovieSearchView(APIView):
         """
         Search for movies based on a search term.
         - Initiates a background task using Celery.
-        - Returns a 302 (Founs) and redirects to a "wait" page while the task is processed.
+        - Returns a 302 (Found) and redirects to a "wait" page while the task is processed.
         - On completion, redirects to the results page.
         """
 
-        # Extract the search term and ensure it exists
-        term = request.data.get("term", "").strip()  # Remove leading and trailing whitespace
+        # Use the serializer to validate the input data
+        serializer = MovieSearchSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not term:
-            return Response(
-                {"error": "Search term is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        term = serializer.validated_data['term']
 
         try:
             # Dispatch the Celery task asynchronously
@@ -103,7 +112,17 @@ class MovieSearchView(APIView):
             permanent=False,
         )
 
-
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name='search_term', type=OpenApiTypes.STR, location=OpenApiParameter.QUERY),
+    ],
+    responses={
+        200: OpenApiTypes.OBJECT,
+        302: OpenApiTypes.STR,
+        500: OpenApiTypes.OBJECT,
+    },
+    description="Handle pending search results from a Celery task.",
+)
 class MovieSearchWaitView(APIView):
     """
     API view to handle pending search results from a Celery task.
@@ -140,7 +159,21 @@ class MovieSearchResultsView(ListAPIView):
     serializer_class = MovieSerializer
     pagination_class = PageNumberPagination
     permission_classes = [AllowAny]
+    queryset = Movie.objects.all()  # Define a default queryset
 
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Movie.objects.none()
+        term = self.request.query_params.get("search_term", "").strip()
+        return Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year')
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='search_term', type=OpenApiTypes.STR, location=OpenApiParameter.QUERY),
+        ],
+        responses={200: MovieSerializer(many=True)},
+        description="Return paginated search results based on the search term.",
+    )
     def get(self, request, *args, **kwargs):
         term = request.query_params.get("search_term", "").strip()
         if not term:
@@ -184,6 +217,11 @@ class MovieDetailView(RetrieveAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieDetailSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Movie.objects.none()  # Return empty queryset for schema generation
+        return Movie.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
         movie_detail = self.get_object()
@@ -234,7 +272,10 @@ class MyMovieNightView(ListCreateAPIView):
         """
         Return movie nights created by the currently authenticated user.
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return MovieNight.objects.none()
         return MovieNight.objects.filter(creator=self.request.user)
+
 
     def perform_create(self, serializer):
         """
@@ -256,6 +297,9 @@ class ParticipatingMovieNightView(ListAPIView):
         """
         Return movie nights where the user is either the creator or a confirmed attendance invitee.
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return MovieNight.objects.none()
+
         user = self.request.user
 
         return MovieNight.objects.filter(
@@ -276,6 +320,8 @@ class InvitedMovieNightView(ListAPIView):
         """
         Return movie nights where the user has been invited.
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return MovieNight.objects.none()
         user = self.request.user
 
         return MovieNight.objects.filter(invites__invitee=user)
@@ -300,6 +346,8 @@ class MyMovieNightInvitationView(ListAPIView):
         """
         Return invitations for the currently authenticated user, excluding those they have explicitly refused.
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return MovieNightInvitation.objects.none()
         return MovieNightInvitation.objects.filter(invitee=self.request.user).exclude(is_attending=False, attendance_confirmed=True)
 
 class MovieNightInvitationCreateView(CreateAPIView):

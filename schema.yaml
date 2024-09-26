@@ -1,0 +1,2092 @@
+openapi: 3.0.3
+info:
+  title: Movie Night
+  version: 1.0.0
+  description: API for Movie Night
+paths:
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/genres/:
+    get:
+      operationId: api_v1_genres_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGenreList'
+          description: ''
+  /api/v1/genres/{id}/:
+    get:
+      operationId: api_v1_genres_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Genre'
+          description: ''
+  /api/v1/movie-nights/:
+    get:
+      operationId: api_v1_movie_nights_list
+      description: |-
+        View for listing all MovieNight instances where the authenticated user
+        is either the creator or a confirmed attendance invitee.
+      parameters:
+      - in: query
+        name: creator
+        schema:
+          type: integer
+      - in: query
+        name: invites__invitee
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: start_from
+        schema:
+          type: string
+          format: date
+        description: Start Time From
+      - in: query
+        name: start_time
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: start_to
+        schema:
+          type: string
+          format: date
+        description: Start Time To
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieNightList'
+          description: ''
+  /api/v1/movie-nights/{id}/:
+    get:
+      operationId: api_v1_movie_nights_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightDetail'
+          description: ''
+    put:
+      operationId: api_v1_movie_nights_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieNightDetail'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MovieNightDetail'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MovieNightDetail'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightDetail'
+          description: ''
+    patch:
+      operationId: api_v1_movie_nights_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMovieNightDetail'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMovieNightDetail'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMovieNightDetail'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightDetail'
+          description: ''
+    delete:
+      operationId: api_v1_movie_nights_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/movie-nights/{id}/invite/:
+    post:
+      operationId: api_v1_movie_nights_invite_create
+      description: |-
+        API view for creating MovieNight invitations.
+        This view allows the creator of a MovieNight to send invitations to other users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieNightInvitation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MovieNightInvitation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MovieNightInvitation'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightInvitation'
+          description: ''
+  /api/v1/movie-nights/invited/:
+    get:
+      operationId: api_v1_movie_nights_invited_list
+      description: View for listing all MovieNight instances where the authenticated
+        user has been invited.
+      parameters:
+      - in: query
+        name: creator
+        schema:
+          type: integer
+      - in: query
+        name: invites__invitee
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: start_from
+        schema:
+          type: string
+          format: date
+        description: Start Time From
+      - in: query
+        name: start_time
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: start_to
+        schema:
+          type: string
+          format: date
+        description: Start Time To
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieNightList'
+          description: ''
+  /api/v1/movienight-invitations/:
+    get:
+      operationId: api_v1_movienight_invitations_list
+      description: View for listing all MovieNight invitation sent for an authenticated
+        user
+      parameters:
+      - in: query
+        name: attendance_confirmed
+        schema:
+          type: boolean
+        description: Filter invitations where invitees have responded to the invitation.
+      - in: query
+        name: is_attending
+        schema:
+          type: boolean
+        description: Filter invitations where invitees have accepted the invitation.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieNightInvitationList'
+          description: ''
+  /api/v1/movienight-invitations/{id}/:
+    get:
+      operationId: api_v1_movienight_invitations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightInvitation'
+          description: ''
+    put:
+      operationId: api_v1_movienight_invitations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieNightInvitation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MovieNightInvitation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MovieNightInvitation'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightInvitation'
+          description: ''
+    patch:
+      operationId: api_v1_movienight_invitations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMovieNightInvitation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMovieNightInvitation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMovieNightInvitation'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNightInvitation'
+          description: ''
+    delete:
+      operationId: api_v1_movienight_invitations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/movies/:
+    get:
+      operationId: api_v1_movies_list
+      description: |-
+        A list view to filter movies based on criteria such as genres, country, year, and runtime.
+
+        This view:
+        - Applies filters provided via query parameters.
+        - Supports ordering by year, runtime, and title.
+
+        Returns: a list of filtered movies.
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+      - in: query
+        name: genres
+        schema:
+          type: array
+          items:
+            type: string
+        description: Genres
+        explode: true
+        style: form
+      - in: query
+        name: imdb_rating_from
+        schema:
+          type: number
+          format: float
+        description: Minimum IMDb Rating
+      - in: query
+        name: is_full_record
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: published_from
+        schema:
+          type: string
+          format: date
+        description: Published Date From
+      - in: query
+        name: published_to
+        schema:
+          type: string
+          format: date
+        description: Published Date To
+      - in: query
+        name: runtime_minutes_from
+        schema:
+          type: integer
+        description: Minimum Runtime (minutes)
+      - in: query
+        name: runtime_minutes_to
+        schema:
+          type: integer
+        description: Maximum Runtime (minutes)
+      - in: query
+        name: title
+        schema:
+          type: string
+        description: Title Contains
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieList'
+          description: ''
+  /api/v1/movies/{id}/:
+    get:
+      operationId: api_v1_movies_retrieve
+      description: |-
+        Retrieve and update detailed information for a single movie.
+
+        This view:
+        - Fetches a movie by its primary key (IMDB ID).
+        - Calls the OMDB API to update movie details if not already fully recorded.
+        - Returns the detailed movie data.
+
+        Returns:
+        - A response containing the movie details or an error if the movie is not found or another issue occurs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieDetail'
+          description: ''
+  /api/v1/movies/search/:
+    post:
+      operationId: api_v1_movies_search_create
+      description: Search for movies based on a search term.
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '302':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/movies/search-results/:
+    get:
+      operationId: api_v1_movies_search_results_list
+      description: Return paginated search results based on the search term.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search_term
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieList'
+          description: ''
+  /api/v1/movies/search-wait/{result_uuid}/:
+    get:
+      operationId: api_v1_movies_search_wait_retrieve
+      description: Handle pending search results from a Celery task.
+      parameters:
+      - in: path
+        name: result_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: search_term
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '302':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/my-movie-nights/:
+    get:
+      operationId: api_v1_my_movie_nights_list
+      description: |-
+        View for listing and creating MovieNight instances that are created by the currently authenticated user.
+
+        - GET: Lists movie nights created by the current user.
+        - POST: Allows the current user to create a new movie night.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: start_from
+        schema:
+          type: string
+          format: date
+        description: Start Time From
+      - in: query
+        name: start_time
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: start_to
+        schema:
+          type: string
+          format: date
+        description: Start Time To
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieNightList'
+          description: ''
+    post:
+      operationId: api_v1_my_movie_nights_create
+      description: |-
+        View for listing and creating MovieNight instances that are created by the currently authenticated user.
+
+        - GET: Lists movie nights created by the current user.
+        - POST: Allows the current user to create a new movie night.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieNight'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MovieNight'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MovieNight'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieNight'
+          description: ''
+  /api/v1/profiles/{email}/:
+    get:
+      operationId: api_v1_profiles_retrieve
+      description: |-
+        API view for retrieving a user's profile by email.
+        Only authenticated users can access this view.
+      parameters:
+      - in: path
+        name: email
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+  /auth/token/:
+    post:
+      operationId: auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      security:
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      security:
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /auth/users/:
+    get:
+      operationId: auth_users_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - auth
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: auth_users_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetype'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetype'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetype'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreatePasswordRetype'
+          description: ''
+  /auth/users/{email}/:
+    get:
+      operationId: auth_users_retrieve
+      parameters:
+      - in: path
+        name: email
+        schema:
+          type: string
+          format: email
+          title: Email address
+        required: true
+      tags:
+      - auth
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: auth_users_update
+      parameters:
+      - in: path
+        name: email
+        schema:
+          type: string
+          format: email
+          title: Email address
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: auth_users_partial_update
+      parameters:
+      - in: path
+        name: email
+        schema:
+          type: string
+          format: email
+          title: Email address
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: auth_users_destroy
+      parameters:
+      - in: path
+        name: email
+        schema:
+          type: string
+          format: email
+          title: Email address
+        required: true
+      tags:
+      - auth
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /auth/users/activation/:
+    post:
+      operationId: auth_users_activation_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Activation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Activation'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activation'
+          description: ''
+  /auth/users/me/:
+    get:
+      operationId: auth_users_me_retrieve
+      tags:
+      - auth
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: auth_users_me_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: auth_users_me_partial_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: auth_users_me_destroy
+      tags:
+      - auth
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /auth/users/resend_activation/:
+    post:
+      operationId: auth_users_resend_activation_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /auth/users/reset_email/:
+    post:
+      operationId: auth_users_reset_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /auth/users/reset_email_confirm/:
+    post:
+      operationId: auth_users_reset_email_confirm_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirm'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsernameResetConfirm'
+          description: ''
+  /auth/users/reset_password/:
+    post:
+      operationId: auth_users_reset_password_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /auth/users/reset_password_confirm/:
+    post:
+      operationId: auth_users_reset_password_confirm_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetype'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetype'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetype'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetConfirmRetype'
+          description: ''
+  /auth/users/set_email/:
+    post:
+      operationId: auth_users_set_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetUsername'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetUsername'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetUsername'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetUsername'
+          description: ''
+  /auth/users/set_password/:
+    post:
+      operationId: auth_users_set_password_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPassword'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetPassword'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetPassword'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetPassword'
+          description: ''
+components:
+  schemas:
+    Activation:
+      type: object
+      properties:
+        uid:
+          type: string
+        token:
+          type: string
+      required:
+      - token
+      - uid
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+      required:
+      - id
+      - name
+    Movie:
+      type: object
+      properties:
+        imdb_id:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+        year:
+          type: integer
+      required:
+      - imdb_id
+      - title
+      - year
+    MovieDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        genres:
+          type: array
+          items:
+            type: string
+        imdb_id:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+        year:
+          type: integer
+        runtime_minutes:
+          type: integer
+          nullable: true
+        plot:
+          type: string
+        country:
+          type: string
+        imdb_rating:
+          type: number
+          format: double
+        url_poster:
+          type: string
+          format: uri
+          maxLength: 200
+        is_full_record:
+          type: boolean
+      required:
+      - country
+      - genres
+      - id
+      - imdb_id
+      - plot
+      - title
+      - url_poster
+      - year
+    MovieNight:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+        creator:
+          type: string
+          format: email
+          title: Email address
+          readOnly: true
+        movie:
+          type: integer
+      required:
+      - creator
+      - id
+      - movie
+      - start_time
+    MovieNightDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        creator:
+          type: string
+          format: email
+          title: Email address
+          readOnly: true
+        pending_invitees:
+          type: array
+          items:
+            type: string
+          description: |-
+            Get all invitees who haven't confirmed yet. Only return the pending invitees if
+            the requesting user is the creator.
+          readOnly: true
+        participants:
+          type: array
+          items:
+            type: string
+          description: |-
+            Get all invitees who have confirmed attendance.
+            This method returns a list of emails for users who have confirmed their attendance.
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+        start_notification_sent:
+          type: boolean
+        movie:
+          type: integer
+      required:
+      - creator
+      - id
+      - movie
+      - participants
+      - pending_invitees
+      - start_time
+    MovieNightInvitation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        invitee:
+          type: string
+          format: email
+        invited_time:
+          type: string
+          format: date-time
+          readOnly: true
+        attendance_confirmed:
+          type: boolean
+        is_attending:
+          type: boolean
+        movie_night:
+          type: integer
+      required:
+      - id
+      - invited_time
+      - invitee
+      - movie_night
+    PaginatedGenreList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+    PaginatedMovieList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Movie'
+    PaginatedMovieNightInvitationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieNightInvitation'
+    PaginatedMovieNightList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieNight'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PasswordResetConfirmRetype:
+      type: object
+      properties:
+        uid:
+          type: string
+        token:
+          type: string
+        new_password:
+          type: string
+        re_new_password:
+          type: string
+      required:
+      - new_password
+      - re_new_password
+      - token
+      - uid
+    PatchedMovieNightDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        creator:
+          type: string
+          format: email
+          title: Email address
+          readOnly: true
+        pending_invitees:
+          type: array
+          items:
+            type: string
+          description: |-
+            Get all invitees who haven't confirmed yet. Only return the pending invitees if
+            the requesting user is the creator.
+          readOnly: true
+        participants:
+          type: array
+          items:
+            type: string
+          description: |-
+            Get all invitees who have confirmed attendance.
+            This method returns a list of emails for users who have confirmed their attendance.
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+        start_notification_sent:
+          type: boolean
+        movie:
+          type: integer
+    PatchedMovieNightInvitation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        invitee:
+          type: string
+          format: email
+        invited_time:
+          type: string
+          format: date-time
+          readOnly: true
+        attendance_confirmed:
+          type: boolean
+        is_attending:
+          type: boolean
+        movie_night:
+          type: integer
+    PatchedUser:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+    SendEmailReset:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    SetPassword:
+      type: object
+      properties:
+        new_password:
+          type: string
+        current_password:
+          type: string
+      required:
+      - current_password
+      - new_password
+    SetUsername:
+      type: object
+      properties:
+        current_password:
+          type: string
+        new_email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - current_password
+      - new_email
+    TokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - email
+      - password
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+      required:
+      - email
+    UserCreatePasswordRetype:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+        re_password:
+          type: string
+      required:
+      - email
+      - password
+      - re_password
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bio:
+          type: string
+        user:
+          type: integer
+      required:
+      - bio
+      - id
+      - user
+    UsernameResetConfirm:
+      type: object
+      properties:
+        new_email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - new_email
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

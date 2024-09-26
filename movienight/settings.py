@@ -115,7 +115,7 @@ class Dev(Configuration):
 
     LANGUAGE_CODE = 'en-us'
 
-    TIME_ZONE = values.Value('UTC')
+    TIME_ZONE = values.Value('Europe/Paris')
 
     USE_I18N = True
 
@@ -201,8 +201,19 @@ class Dev(Configuration):
                 'description': 'Basic authentication with username and password.'
             },
         },
+        'SECURITY_DEFINITIONS': {
+            'Token': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header',
+            },
+            'Basic': {
+                'type': 'basic',
+            },
+        },  
     }
     BASE_URL = "http://localhost:8000" 
+
     # CELERY 
     CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
     CELERY_BROKER_URL = "redis://localhost:6379/0"

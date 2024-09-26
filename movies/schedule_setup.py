@@ -13,11 +13,14 @@ def schedule_setup():
     within a specific timeframe and sends appropriate notifications.
     """
     minute_schedule, created = IntervalSchedule.objects.get_or_create(period=IntervalSchedule.MINUTES, every=1)
-    check_movie_time = PeriodicTask(
-        name="Check movie start time each minute",
+    # Create or get the periodic task linked to this schedule
+    task, created = PeriodicTask.objects.get_or_create(
+        name="Test movie start time each minute",
         interval=minute_schedule,
-        task='movie.tasks.notify_of_starting_soon'
+        task='movies.tasks.notify_of_starting_soon',
+        enabled=True
     )
+    
 
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com

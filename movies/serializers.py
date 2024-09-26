@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation, UserProfile
 from movienight_auth.models import User
+from typing import List
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,6 +23,9 @@ class GenreSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"The genre '{value}' already exists.")
         return value_lower
 
+class MovieSearchSerializer(serializers.Serializer):
+    term = serializers.CharField(max_length=255)
+    
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
@@ -95,7 +100,7 @@ class MovieNightDetailSerializer(serializers.ModelSerializer):
         except User.DoesNotExist:
             raise serializers.ValidationError(f"User with email {value} does not exist.")
 
-    def get_participants(self, obj):
+    def get_participants(self, obj) -> List[str]:
         """ 
         Get all invitees who have confirmed attendance.
         This method returns a list of emails for users who have confirmed their attendance.
@@ -107,7 +112,7 @@ class MovieNightDetailSerializer(serializers.ModelSerializer):
         # Extract the emails of confirmed invitees
         return [invitee.invitee.email for invitee in confirmed_invitees]
 
-    def get_pending_invitees(self, obj):
+    def get_pending_invitees(self, obj) -> List[str]:
         """
         Get all invitees who haven't confirmed yet. Only return the pending invitees if 
         the requesting user is the creator.

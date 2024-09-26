@@ -59,7 +59,8 @@ class TestMovieSearch:
         response = any_client.post(url, data, format='json')
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data['error'] == 'Search term is required.'
+        assert 'term' in response.data
+        assert response.data['term'][0] == 'This field is required.'
 
     def test_movie_search_exception(self, any_client, mocker):
         """Returns 500 error on internal exception."""

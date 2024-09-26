@@ -23,6 +23,9 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from movies.models import MovieNight
+import logging
+
+logger = logging.getLogger(__name__)
 
 def send_invitation(movie_night_invitation):
     """
@@ -148,7 +151,7 @@ def notify_of_starting_soon():
     This function finds all movie nights that are about to start but have not yet
     sent a notification, and sends a starting notification to the invitees and the creator.
     """
-    start_before = timezone.now() + timedelta(minutes=30)
+    start_before = timezone.now() + timedelta(minutes=60)
 
     movie_nights = MovieNight.objects.filter(
         start_time__lte=start_before, start_notification_sent=False
@@ -156,6 +159,7 @@ def notify_of_starting_soon():
 
     for movie_night in movie_nights:
         send_starting_notification(movie_night)
+
 
 
 def send_movie_night_update(movie_night, start_time):
@@ -181,7 +185,7 @@ def send_movie_night_update(movie_night, start_time):
     )
 
     body = render_to_string(
-        "movies/notifications/attendance_update_body.txt",
+        "movies/notifications/movie_night_update_body.txt",
         {
             "start_time": start_time,
             "movie_night": movie_night,
