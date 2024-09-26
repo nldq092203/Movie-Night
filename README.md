@@ -1,6 +1,6 @@
 # Movie Night Together
 
-**Movie Night Together** is a web application designed to help friends and family organize movie nights seamlessly. Users can search for movies, create movie night events, invite others, and receive notifications—all within a user-friendly interface.
+**Movie Night Together** is a web application API designed to help friends and family organize movie nights seamlessly. Users can search for movies, create movie night events, invite others, and receive notifications—all within a user-friendly interface.
 
 ## Table of Contents
 
