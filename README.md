@@ -4,17 +4,14 @@
 
 ## Table of Contents
 
-- [Features](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Tech Stack](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Installation](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Configuration](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Usage](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [API Documentation](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Testing](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Contributing](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [License](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
+- [Features]
+- [Tech Stack]
+- [Installation]
+- [Configuration]
+- [Usage]
+- [API Documentation]
+- [Testing]
 - [Contact](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
-- [Suggestions for an Effective README](https://www.notion.so/README-10d68b6fcc4780dabebddfc1b00336ec?pvs=21)
 
 ## Features
 
