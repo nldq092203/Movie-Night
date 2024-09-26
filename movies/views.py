@@ -370,21 +370,38 @@ class MovieNightInvitationCreateView(CreateAPIView):
         serializer.save(movie_night=movie_night)
 
 class MovieNightInvitationDetailView(RetrieveUpdateDestroyAPIView):
-    serializer_class = MovieNightInvitationSerializer
-    permission_classes = [IsAuthenticated, IsInvitee]
-    queryset = MovieNightInvitation.objects.all()
+    """
+    View for retrieving, updating, or deleting a MovieNightInvitation instance.
 
-############## Genre ###################
+    - GET: Retrieve details of a specific movie night invitation.
+    - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+    - DELETE: Remove a movie night invitation if the user is the invitee.
+    """
+    serializer_class = MovieNightInvitationSerializer
+    permission_classes = [IsAuthenticated, IsInvitee]  
+    queryset = MovieNightInvitation.objects.all() 
+
+################# Genre ###################
 class GenreView(ListAPIView):
+    """
+    View for listing all genres.
+
+    - GET: Lists all genres available in the system.
+    """
     serializer_class = GenreSerializer
-    permission_classes = [AllowAny]
-    queryset = Genre.objects.all()
+    permission_classes = [AllowAny]  
+    queryset = Genre.objects.all() 
+
 
 class GenreDetailView(RetrieveAPIView):
-    serializer_class = GenreSerializer
-    permission_classes = [AllowAny]
-    queryset = Genre.objects.all()
+    """
+    View for retrieving the details of a specific genre.
 
+    - GET: Retrieve details of a specific genre by its ID.
+    """
+    serializer_class = GenreSerializer
+    permission_classes = [AllowAny]  
+    queryset = Genre.objects.all()  
 
 ######## Profile #########
 class ProfileView(RetrieveAPIView):

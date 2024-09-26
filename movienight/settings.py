@@ -222,3 +222,12 @@ class Dev(Configuration):
 class Prod(Dev):
     DEBUG = False
     SECRET_KEY = values.SecretValue()
+    # DATABASES = {
+    #     'default': values.DatabaseURLValue(
+    #         default=f"postgres://{os.getenv('DB_USER', 'default')}:"
+    #                 f"{os.getenv('DB_PASSWORD', 'default')}@"
+    #                 f"{os.getenv('DB_HOST', 'default')}:"
+    #                 f"{os.getenv('DB_PORT', 'default')}/"
+    #                 f"{os.getenv('DB_NAME', 'default')}"
+    #     )
+    # }
