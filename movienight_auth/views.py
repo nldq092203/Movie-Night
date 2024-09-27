@@ -31,9 +31,7 @@ class GoogleLoginAPIView(APIView):
             user, created = User.objects.get_or_create(email=email, defaults={
                 'first_name': first_name,
                 'last_name': last_name,
-                'email': email.split('@')[0],
             })
-
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
             return Response({
