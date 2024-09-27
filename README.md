@@ -30,7 +30,7 @@
 ## Tech Stack
 
 - **Backend**: Django, Django REST Framework
-- **Authentication**: Djoser, JWT, Allauth (Google)
+- **Authentication**: Djoser, JWT, google-auth(Google)
 - **Asynchronous Tasks**: Celery, Redis
 - **Database**:  SQLite for Dev (PostgreSQL for Prod)
 - **External APIs**: OMDb API
@@ -43,8 +43,8 @@
 
 - Python 3.9 or higher
 - Redis (for Celery broker)
-- PostgreSQL (or another database)
-- Node.js and npm (for frontend development, if applicable)
+- SQLite (Dev) and PostgreSQL (Prod)
+
 
 ### Clone the Repository
 

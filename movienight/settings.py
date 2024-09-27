@@ -48,7 +48,6 @@ class Dev(Configuration):
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.messages',
-        'django.contrib.sites',  # Required by allauth
         'django.contrib.staticfiles',
 
         # Third-party apps
@@ -57,13 +56,7 @@ class Dev(Configuration):
         'rest_framework_simplejwt',
         'drf_spectacular',
         'djoser',
-
         'movienight_auth',  # Contains custom user model
-
-        'allauth',
-        # 'allauth.account',
-        'allauth.socialaccount',
-        'allauth.socialaccount.providers.google',
         "django_celery_results",
         "django_celery_beat",
 
@@ -178,6 +171,10 @@ class Dev(Configuration):
             "rest_framework.filters.OrderingFilter"
         ],
     }
+
+
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID') 
+    
     DJOSER = {
         "USER_ID_FIELD": "email",
         "LOGIN_FIELD": "email",
@@ -230,24 +227,6 @@ class Dev(Configuration):
         },  
     }
     BASE_URL = "http://localhost:8000" 
-
-    AUTHENTICATION_BACKENDS = (
-        'django.contrib.auth.backends.ModelBackend',  # Django default
-        'allauth.account.auth_backends.AuthenticationBackend',  # Allauth
-    )
-
-    SITE_ID = 1
-
-    # Enable JWT for dj-rest-auth
-    REST_USE_JWT = True
-    ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-    ACCOUNT_EMAIL_REQUIRED = True
-    ACCOUNT_USERNAME_REQUIRED = False
-    ACCOUNT_AUTHENTICATION_METHOD = "email"
-
-    # # Google OAuth credentials
-    # SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
-    # SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
     # CELERY 
     CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
