@@ -105,7 +105,7 @@ class Dev(Configuration):
             'NAME': os.getenv('POSTGRES_DB', 'movie_night'),
             'USER': os.getenv('POSTGRES_USER','user'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD','secret'),
-            'HOST': os.getenv('DB_HOST','localhost'),
+            'HOST': os.getenv('DB_HOST','db'),
             'PORT': os.getenv('DB_PORT','5432'),
         }
     }

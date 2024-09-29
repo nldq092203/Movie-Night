@@ -6,9 +6,9 @@
 
 - [Features]
 - [Tech Stack]
-- [Installation]
-- [Configuration]
-- [Usage]
+- [Installation and Usage]
+- [Accessibility]
+- [Docker Compose Configuration]
 - [API Documentation]
 - [Testing]
 - [Contact]
@@ -36,14 +36,13 @@
 - **External APIs**: OMDb API
 - **Testing**: Pytest, Factory Boy
 - **Documentation**: Swagger/OpenAPI
+- **Docker**: Dockerfile/Docker Compose
 
-## Installation
+## Installation and Usage
 
 ### Prerequisites
 
-- Python 3.9 or higher
-- Redis (for Celery broker)
-- SQLite (Dev) and PostgreSQL (Prod)
+- **Docker and Docker Compose installed on your system.**
 
 
 ### Clone the Repository
@@ -54,102 +53,57 @@ cd Movie-Night
 
 ```
 
-### Set Up a Virtual Environment
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-
-```
-
-### Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
 ### Environment Variables
 
-Create a `.env` file in the project root and configure the following variables:
-
-```
-
+```bash
+# Django settings
 SECRET_KEY=your_secret_key
 DEBUG=True
-DATABASE_URL=postgres://user:password@localhost:5432/movienightdb
-REDIS_URL=redis://localhost:6379/0
+
+# Database settings
+POSTGRES_USER=your_postgres_user
+POSTGRES_PASSWORD=your_postgres_password
+POSTGRES_DB=your_postgres_db
+DB_HOST = db
+DB_PORT = 5432
+
+# Redis settings
+REDIS_URL=redis://redis:6379/0
+
+# External API keys
 OMDB_API_KEY=your_omdb_api_key
-
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=your_google_client_id
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=your_google_client_secret
 ```
 
-### Apply Migrations
+### Docker Setup
+
+#### 1. Build and Start Containers:
 
 ```bash
-python manage.py migrate
+docker-compose up --build
 
 ```
 
-### Create a Superuser
+#### 2.Run Database Migrations (Optional)
 
 ```bash
-python manage.py createsuperuser
+docker-compose exec web python manage.py migrate
 
 ```
 
-### Install Redis (if not already installed)
-
-For macOS:
+#### 3. Create a Superuser:
 
 ```bash
-brew install redis
-brew services start redis
-
+docker-compose exec web python manage.py createsuperuser
 ```
 
-For Ubuntu:
-
+#### 4. Stop the application
 ```bash
-sudo apt-get install redis-server
-sudo systemctl enable redis-server.service
-
+docker-compose down
 ```
 
-## Configuration
-
-### Django Settings
-
-The project uses `django-configurations` and `dj-database-url` for settings management.
-
-- **settings.py**: Contains the base configuration using class-based settings.
-- **wsgi.py** and **manage.py**: Updated to use `django-configurations`.
-
-### Celery Configuration
-
-- **Broker**: Redis
-- **Backend**: Redis
-- **Start Celery Worker**:
-    
-    ```bash
-    celery -A movienight worker -l DEBUG                          
-    ```
-    
-- **Start Celery Beat Scheduler**:
-    
-    ```bash
-    celery -A movienight beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    
-    ```
-    
-
-## Usage
-
-### Running the Development Server
-
-```bash
-python manage.py runserver
-
-```
-
+## Accessibility
 ### Accessing the Application
 
 - Visit `http://localhost:8000/` to access the application.
@@ -161,6 +115,16 @@ python manage.py runserver
 - **Movies**: `/api/v1/movies/`
 - **Movie Nights**: `/api/v1/movienights/`
 - **Invitations**: `/api/v1/invitations/`
+
+## Docker Compose Configuration
+The docker-compose.yml file includes services for:
+
+- **web: The Django application.**
+- **db: PostgreSQL database.**
+- **redis: Redis server for Celery.**
+- **celery: Celery worker for asynchronous tasks.**
+- **celery-beat: Celery Beat scheduler for periodic tasks.**
+    
 
 ## API Documentation
 
