@@ -98,8 +98,19 @@ class Dev(Configuration):
     # Database
     # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-    DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
+    # Database configuration
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'movie_night'),
+            'USER': os.getenv('POSTGRES_USER','user'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD','secret'),
+            'HOST': os.getenv('DB_HOST','localhost'),
+            'PORT': os.getenv('DB_PORT','5432'),
+        }
+    }
 
+    # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
 
     # Password validation
     # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -174,6 +185,7 @@ class Dev(Configuration):
 
 
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID') 
+    GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
     
     DJOSER = {
         "USER_ID_FIELD": "email",
@@ -230,7 +242,12 @@ class Dev(Configuration):
 
     # CELERY 
     CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
-    CELERY_BROKER_URL = "redis://localhost:6379/0"
+    # CELERY_BROKER_URL = "redis://localhost:6379/0"
+    CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+    CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_RESULT_SERIALIZER = 'json'
 
 
 

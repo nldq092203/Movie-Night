@@ -5,7 +5,7 @@ Test cases for Movie model. Verify movie creation with unique imdb_id
 import pytest
 from movies.models import Movie, Genre
 from django.db import IntegrityError
-from tests.factories import GenreFactory, MovieFactory
+from tests.factories import MovieFactory
 
 @pytest.mark.django_db
 class TestMovie:
