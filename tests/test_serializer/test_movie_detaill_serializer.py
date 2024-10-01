@@ -90,7 +90,6 @@ class TestMovieDetailSerializer:
         assert updated_movie.runtime_minutes == 136
         assert updated_movie.plot == "A computer hacker learns from mysterious rebels about the true nature of his reality."
         assert updated_movie.country == "USA"
-        assert updated_movie.is_full_record is True
         assert updated_movie.imdb_rating == 8.7
         assert updated_movie.url_poster == "http://example.com/matrix.jpg"
         assert updated_movie.genres.count() == 2

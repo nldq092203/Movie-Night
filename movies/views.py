@@ -54,6 +54,8 @@ from celery.result import AsyncResult
 
 from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiExample, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
+import logging
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -122,8 +124,8 @@ class MovieSearchView(APIView):
             )
 
         try:
-            # Check if the task completes in 2 seconds, else redirect to "wait"
-            res.get(timeout=2)
+            # Check if the task completes in 10 seconds, else redirect to "wait"
+            res.get(timeout=10)
         except TimeoutError:
             # Redirect to a wait page if the task is still running
             return redirect(
@@ -209,7 +211,7 @@ class MovieSearchResultsView(ListAPIView):
                 {"error": "Search term is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        movie_list = Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year', 'url_poster')
+        movie_list = Movie.objects.filter(title__icontains=term).only('id', 'imdb_id', 'title', 'year', 'url_poster').order_by('-year')
 
         # Check if there are any results
         if not movie_list:
@@ -257,6 +259,7 @@ class MovieDetailView(RetrieveAPIView):
             fill_movie_details(movie_detail)
 
         except Exception as e:
+            logger.error(f"Error fetching movie details: {str(e)}")
             return Response(
                 {"error": "An unexpected error occurred."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

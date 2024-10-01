@@ -21,8 +21,8 @@ class OmdbMovie:
             )
 
     @property
-    def imdb_id(self):
-        return self.data["imdbID"]
+    def imdb_id(self)->str:
+        return str(self.data["imdbID"])
 
     @property
     def title(self):
@@ -63,7 +63,10 @@ class OmdbMovie:
     
     @property
     def imdb_rating(self):
-        return float(self.data["imdbRating"])
+        try:
+            return float(self.data["imdbRating"])
+        except (ValueError, KeyError, TypeError):
+            return 0.0
     
     @property
     def url_poster(self):

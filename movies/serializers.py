@@ -2,6 +2,8 @@ from rest_framework import serializers
 from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation, UserProfile
 from movienight_auth.models import User
 from typing import List
+import logging
+logger = logging.getLogger(__name__)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -29,7 +31,7 @@ class MovieSearchSerializer(serializers.Serializer):
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = ["imdb_id", "title", "year", "url_poster"]
+        fields = ["id", "imdb_id", "title", "year", "url_poster"]
 
 class GenreField(serializers.StringRelatedField):
     def to_internal_value(self, data):
@@ -42,18 +44,11 @@ class GenreField(serializers.StringRelatedField):
 
 
 class MovieDetailSerializer(serializers.ModelSerializer):
-    genres = GenreField(many=True)  # Handling multiple genres
+    genres = GenreField(many=True)
 
     class Meta:
         model = Movie
         fields = "__all__"
-
-    def update(self, instance, validated_data):
-        instance = super(MovieDetailSerializer, self).update(instance, validated_data)
-        instance.is_full_record = True
-        instance.save()
-
-        return instance
 
     def validate_year(self, value):
         """
@@ -62,7 +57,6 @@ class MovieDetailSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Year must be a positive integer.")
         return value
-
 
 class SearchTermSerializer(serializers.ModelSerializer):
     class Meta:

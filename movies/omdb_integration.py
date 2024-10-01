@@ -31,15 +31,20 @@ def fill_movie_details(movie):
         )
         return
     omdb_client = get_client_from_settings()
-    movie_details = omdb_client.get_by_imdb_id(movie.imdb_id)
-
-    logger.warning(movie_details.to_dict())
+    try:
+        movie_details = omdb_client.get_by_imdb_id(movie.imdb_id)
+    except Exception as e:
+        logger.error(str(e))
 
     serializer = MovieDetailSerializer(instance=movie, data=movie_details.to_dict())
+
     if serializer.is_valid():
+        serializer.is_full_record = True
+        serializer.id = movie.id
         serializer.save()
     else:
         logger.error("Failed to update movie details: %s", serializer.errors)
+    
 
 def search_and_save(search):
     """
