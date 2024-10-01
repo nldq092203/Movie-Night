@@ -140,10 +140,10 @@ class TestSearchAndSave:
         self.mock_search_get_or_create.return_value = (mocker.Mock(term=self.search_term, last_search=now()), True)
 
         self.mock_omdb_client.return_value.search.return_value = [
-            mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010),
+            mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010, url_poster="http://example.com/inception.jpg"),
         ]
         # Mock a new movie created
-        self.mock_movie_get_or_create.return_value = (mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010), True)
+        self.mock_movie_get_or_create.return_value = (mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010, url_poster="http://example.com/inception.jpg"), True)
 
         search_and_save(self.search_term)
 
@@ -161,6 +161,7 @@ class TestSearchAndSave:
             defaults={
                 "title": "Inception",
                 "year": 2010,
+                "url_poster": "http://example.com/inception.jpg"
             },
         )
         # Assert the logger logged the creation of the movie
@@ -174,10 +175,10 @@ class TestSearchAndSave:
             self.mock_search_get_or_create.return_value = (mocker.Mock(term=self.search_term, last_search=now()), True)
 
             self.mock_omdb_client.return_value.search.return_value = [
-                mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010),
+                mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010, url_poster="http://example.com/inception.jpg"),
             ]
             # Mock a new movie created
-            self.mock_movie_get_or_create.return_value = (mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010), False)
+            self.mock_movie_get_or_create.return_value = (mocker.Mock(imdb_id="tt1375666", title="Inception", year=2010, url_poster="http://example.com/inception.jpg"), False)
 
             search_and_save(self.search_term)
 

@@ -52,7 +52,8 @@ from movienight.celery import app
 from rest_framework.views import APIView
 from celery.result import AsyncResult
 
-from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiExample, OpenApiParameter, OpenApiResponse
+from drf_spectacular.types import OpenApiTypes
 
 User = get_user_model()
 
@@ -60,11 +61,38 @@ User = get_user_model()
 @extend_schema(
     request=MovieSearchSerializer,
     responses={
-        302: OpenApiTypes.STR,
-        400: OpenApiTypes.OBJECT,
-        500: OpenApiTypes.OBJECT,
+        302: OpenApiResponse(
+            description="Redirected to either the 'wait' page or the results page depending on task completion.",
+            response=OpenApiTypes.STR
+        ),
+        400: OpenApiResponse(
+            description="Invalid input data. The request failed validation. The response contains error details.",
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Invalid Input',
+                    value={
+                        "term": ["This field is required."]
+                    },
+                    response_only=True  # Set this as response-only example
+                )
+            ]
+        ),
+        500: OpenApiResponse(
+            description="Internal Server Error. An error occurred while processing the request. This typically happens due to Celery issues or other server problems.",
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Server Error',
+                    value={
+                        "error": "An error occurred while processing your request."
+                    },
+                    response_only=True 
+                )
+            ]
+        ),
     },
-    description="Search for movies based on a search term.",
+    description="Search for movies based on a search term. This view initiates a background task using Celery to fetch results, and returns a 302 redirect based on task completion.",
 )
 class MovieSearchView(APIView):
     permission_classes = [AllowAny]
@@ -165,7 +193,7 @@ class MovieSearchResultsView(ListAPIView):
         if getattr(self, 'swagger_fake_view', False):
             return Movie.objects.none()
         term = self.request.query_params.get("search_term", "").strip()
-        return Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year')
+        return Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year', 'url_poster')
 
     @extend_schema(
         parameters=[
@@ -181,7 +209,7 @@ class MovieSearchResultsView(ListAPIView):
                 {"error": "Search term is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        movie_list = Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year')
+        movie_list = Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year', 'url_poster')
 
         # Check if there are any results
         if not movie_list:

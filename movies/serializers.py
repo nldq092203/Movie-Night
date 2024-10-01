@@ -29,7 +29,7 @@ class MovieSearchSerializer(serializers.Serializer):
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = ["imdb_id", "title", "year"]
+        fields = ["imdb_id", "title", "year", "url_poster"]
 
 class GenreField(serializers.StringRelatedField):
     def to_internal_value(self, data):

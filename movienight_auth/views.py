@@ -7,12 +7,30 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 
 User = get_user_model()
 
+
 class GoogleLoginAPIView(APIView):
     permission_classes = [AllowAny]
-
+    @extend_schema(
+        request=None,
+        parameters=[
+            OpenApiParameter(
+                name='id_token',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description='The ID token received from Google',
+                required=True
+            )
+        ],
+        responses={
+            200: OpenApiResponse(description='Successful authentication'),
+            400: OpenApiResponse(description='ID token is required'),
+            401: OpenApiResponse(description='Unauthorized')
+        }
+    )
     def post(self, request):
         token = request.data.get('id_token')
         if not token:

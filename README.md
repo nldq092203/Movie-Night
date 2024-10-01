@@ -169,6 +169,10 @@ pytest
 - **Tasks**: Test Celery tasks and scheduled jobs.
 - **Serializers**: Ensure data serialization and deserialization works as expected.
 
+
+```bash
+docker-compose exec web pytest
+```
 ### Mocking External Services
 
 Use mocking to simulate external API calls (e.g., OMDb API) during tests to avoid hitting real endpoints.

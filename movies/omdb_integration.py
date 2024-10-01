@@ -46,7 +46,6 @@ def search_and_save(search):
     Perform a search for search_term against the API, but only if it hasn't been searched in the past 24 hours. Save
     each result to the local DB as a partial record.
     """
-    logger.warning("Here")
     # Replace multiple spaces with single spaces, and lowercase the search
     normalized_search_term = re.sub(r"\s+", " ", search.lower())
 
@@ -68,7 +67,8 @@ def search_and_save(search):
             imdb_id=omdb_movie.imdb_id,
             defaults={
                 "title": omdb_movie.title,  # Set attributes in defaults if a new Movie is created
-                "year": omdb_movie.year,                   
+                "year": omdb_movie.year,
+                "url_poster": omdb_movie.url_poster                   
             },
         )
 

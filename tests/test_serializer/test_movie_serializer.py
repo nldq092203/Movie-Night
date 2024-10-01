@@ -15,7 +15,8 @@ class TestMovieSerializer:
         movie = Movie.objects.create(
             imdb_id="tt1375666",
             title="Inception",
-            year=2010
+            year=2010,
+            url_poster="http://example.com/inception.jpg"
         )
 
         serializer = MovieSerializer(instance=movie)
@@ -33,7 +34,8 @@ class TestMovieSerializer:
         data = {
             "imdb_id": "tt0133093",
             "title": "The Matrix",
-            "year": 1999
+            "year": 1999,
+            "url_poster": "http://example.com/inception.jpg"
         }
 
         serializer = MovieSerializer(data=data)
@@ -45,6 +47,7 @@ class TestMovieSerializer:
         assert movie.imdb_id == "tt0133093"
         assert movie.title == "The Matrix"
         assert movie.year == 1999
+        assert movie.url_poster == "http://example.com/inception.jpg"
 
     def test_movie_serializer_invalid_data(self):
         """
@@ -69,13 +72,15 @@ class TestMovieSerializer:
         movie = Movie.objects.create(
             imdb_id="tt0133093",
             title="The Matrix",
-            year=1999
+            year=1999,
+            url_poster="http://example.com/inception.jpg"
         )
 
         data = {
             "imdb_id": "tt0133093",  # Same IMDb ID (immutable)
             "title": "The Matrix Reloaded",
-            "year": 2003
+            "year": 2003,
+            "url_poster": "http://example.com/inception.jpg"
         }
 
         serializer = MovieSerializer(instance=movie, data=data)
