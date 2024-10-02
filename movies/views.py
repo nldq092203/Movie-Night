@@ -124,8 +124,8 @@ class MovieSearchView(APIView):
             )
 
         try:
-            # Check if the task completes in 10 seconds, else redirect to "wait"
-            res.get(timeout=10)
+            # Check if the task completes in 30 seconds, else redirect to "wait"
+            res.get(timeout=30)
         except TimeoutError:
             # Redirect to a wait page if the task is still running
             return redirect(
@@ -415,13 +415,13 @@ class MovieNightInvitationDetailView(RetrieveUpdateDestroyAPIView):
 ################# Genre ###################
 class GenreView(ListAPIView):
     """
-    View for listing all genres.
+    View for listing all genres ordered by "name'
 
     - GET: Lists all genres available in the system.
     """
     serializer_class = GenreSerializer
     permission_classes = [AllowAny]  
-    queryset = Genre.objects.all() 
+    queryset = Genre.objects.all().order_by("name") 
 
 
 class GenreDetailView(RetrieveAPIView):
