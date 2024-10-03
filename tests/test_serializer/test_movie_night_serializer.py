@@ -145,7 +145,7 @@ class TestMovieNightDetailSerializer:
 
         input_data = {
             "movie": movie.id,
-            "start_time": timezone.now(),
+            "start_time": timezone.now() + timedelta(minutes=5),
             # "creator": user.email,
             "start_notification_sent": False
         }
