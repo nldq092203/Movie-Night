@@ -63,7 +63,7 @@ class TestMyMovieNightView:
         url = reverse('my_movienight_list')
         data = {
             "movie": movie.id,
-            "start_time": timezone.now(),
+            "start_time": timezone.now() + timedelta(days=1),
             # "creator": user.email,
             "start_notification_sent": False
         }

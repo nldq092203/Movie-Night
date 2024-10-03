@@ -6,6 +6,7 @@ from movies.models import MovieNight, Movie, MovieNightInvitation
 from movies.serializers import MovieNightSerializer, MovieNightDetailSerializer
 from tests.factories import UserFactory, MovieFactory, MovieNightInvitationFactory, MovieNightFactory
 from django.utils import timezone
+from datetime import timedelta
 
 @pytest.mark.django_db
 class TestMovieNightSerializer:
@@ -34,7 +35,7 @@ class TestMovieNightSerializer:
         """
         user = UserFactory(email="test@example.com")
         movie = MovieFactory(title="Inception")
-        start_time = timezone.now()
+        start_time = timezone.now() + timedelta(days=1)
 
         # Input data to be deserialized (creator is read-only and automatically set)
         input_data = {
@@ -70,6 +71,27 @@ class TestMovieNightSerializer:
         serializer = MovieNightSerializer(data=input_data, context={"request": {"user": user}})
         assert not serializer.is_valid()
         assert "movie" in serializer.errors  # Check that the movie field is required
+
+    def test_movie_night_serializer_validate_start_time_invalid(self):
+        """
+        Test that MovieNightSerializer raises validation error when start_time is in the past.
+        """
+        user = UserFactory(email="test@example.com")
+        movie = MovieFactory(title="Inception")
+        invalid_start_time = timezone.now() - timezone.timedelta(days=1)  # Past time
+
+        # Input data with invalid start_time
+        input_data = {
+            "start_time": invalid_start_time,
+            "movie": movie.id,
+        }
+
+        # Deserialize the input data and check for validation error
+        serializer = MovieNightSerializer(data=input_data, context={"request": {"user": user}})
+        assert not serializer.is_valid()
+        assert "start_time" in serializer.errors  # Check that the start_time field is required
+        assert "Start time must be in the future." in serializer.errors["start_time"]  # Customize this error message as per your implementation
+
 @pytest.mark.django_db
 class TestMovieNightDetailSerializer:
     def test_movie_night_detail_serializer_serialization(self):

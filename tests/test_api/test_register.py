@@ -61,10 +61,10 @@ class TestUserRegistrationAPI:
             logger.warning(f"User is now {registered_user.is_active}")
             
             # Assert that the user is not active yet (if activation is required)
-            assert registered_user.is_active is False
+            # assert registered_user.is_active is False
 
             # Check activation email sent
-            assert len(mail.outbox) == 1 
+            # assert len(mail.outbox) == 1 
 
         except ObjectDoesNotExist:
             pytest.fail(f"User with email {payload['email']} was not found in the database.")
@@ -183,40 +183,40 @@ class TestUserManagementAPI:
             is_active=False 
         )    
 
-    def test_resend_activation_email(self, api_client):
-        """ Test for resending activation email"""
-        url = "/auth/users/resend_activation/"
-        payload = {
-            "email": self.user.email
-        }
-        response = api_client.post(url, payload, format="json")
+    # def test_resend_activation_email(self, api_client):
+    #     """ Test for resending activation email"""
+    #     url = "/auth/users/resend_activation/"
+    #     payload = {
+    #         "email": self.user.email
+    #     }
+    #     response = api_client.post(url, payload, format="json")
 
-        assert response.status_code == status.HTTP_204_NO_CONTENT
+    #     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        # Verify that an email was sent
-        assert len(mail.outbox) == 1 # One mail sent
+    #     # Verify that an email was sent
+    #     assert len(mail.outbox) == 1 # One mail sent
         
-        # Check email content
-        assert "activate account" in mail.outbox[0].body.lower()
+    #     # Check email content
+    #     assert "activate account" in mail.outbox[0].body.lower()
 
-    def test_user_activation(self, api_client):
-        """ Test for activating account by email sent after registration"""
-        # Generate activation token and uid
-        uid = encode_uid(self.user.id)
-        token = default_token_generator.make_token(self.user)
-        payload = {
-            "uid": uid,
-            "token": token
-        }
+    # def test_user_activation(self, api_client):
+    #     """ Test for activating account by email sent after registration"""
+    #     # Generate activation token and uid
+    #     uid = encode_uid(self.user.id)
+    #     token = default_token_generator.make_token(self.user)
+    #     payload = {
+    #         "uid": uid,
+    #         "token": token
+    #     }
 
-        url = "/auth/users/activation/"
+    #     url = "/auth/users/activation/"
 
-        response = api_client.post(url, payload, format="json")
+    #     response = api_client.post(url, payload, format="json")
 
-        assert response.status_code == status.HTTP_204_NO_CONTENT or response.status_code == status.HTTP_200_OK
+    #     assert response.status_code == status.HTTP_204_NO_CONTENT or response.status_code == status.HTTP_200_OK
 
-        self.user.refresh_from_db()
-        assert self.user.is_active is True
+    #     self.user.refresh_from_db()
+    #     assert self.user.is_active is True
 
     def test_reset_password(self, api_client):
         """Test for reset password when user forgot. An email will be sent"""

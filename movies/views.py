@@ -297,7 +297,7 @@ class MyMovieNightView(ListCreateAPIView):
     serializer_class = MovieNightSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = MyMovieNightFilterSet
-    ordering_fields = ["start_time"]
+    ordering_fields = ["start_time", "movie"]
 
     def get_queryset(self):
         """

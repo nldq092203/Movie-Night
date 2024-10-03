@@ -190,7 +190,7 @@ class Dev(Configuration):
     DJOSER = {
         "USER_ID_FIELD": "email",
         "LOGIN_FIELD": "email",
-        "SEND_ACTIVATION_EMAIL": True,
+        "SEND_ACTIVATION_EMAIL": False,
         "ACTIVATION_URL": 'auth/users/activate/{uid}/{token}/',
         "PASSWORD_RESET_CONFIRM_URL": 'auth/password/reset/confirm/{uid}/{token}/',
         "PASSWORD_RESET_CONFIRM_RETYPE": True,

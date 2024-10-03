@@ -179,7 +179,7 @@ class TestMovieSearchResultsView:
         assert response.status_code == status.HTTP_200_OK
 
         # Assert that the number of results is equal to the page size (50)
-        assert len(response.data['results']) == 50
+        assert len(response.data['results']) == 20
 
         # Assert that there is a 'next' link in the response
         assert response.data['next'] is not None

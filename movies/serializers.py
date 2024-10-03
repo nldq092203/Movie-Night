@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation, UserProfile
 from movienight_auth.models import User
+from django.utils import timezone
 from typing import List
 import logging
 logger = logging.getLogger(__name__)
@@ -75,6 +76,14 @@ class MovieNightSerializer(serializers.ModelSerializer):
     class Meta:
         model = MovieNight
         fields = ['id', 'start_time', 'creator', 'movie']
+        
+    def validate_start_time(self, value):
+        """
+        Check that the start_time is in the future.
+        """
+        if value <= timezone.now():
+            raise serializers.ValidationError("Start time must be in the future.")
+        return value
 
 class MovieNightDetailSerializer(serializers.ModelSerializer):
     creator = serializers.ReadOnlyField(source='creator.email') 
