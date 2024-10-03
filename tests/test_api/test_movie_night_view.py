@@ -255,6 +255,7 @@ class TestMovieNightDetailView:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['id'] == movie_night.id
         assert response.data['creator'] == user.email
+        assert response.data['is_creator'] is True
 
     def test_movie_night_detail_view_accepted_invitee(self, authenticated_client, user):
         """
@@ -282,6 +283,7 @@ class TestMovieNightDetailView:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['id'] == movie_night.id
         assert response.data['creator'] == movie_creator.email
+        assert response.data['is_creator'] is False
 
     def test_movie_night_detail_view_unconfirmed_invitee(self, authenticated_client, user):
         """
@@ -453,8 +455,8 @@ class TestInvitedMovieNightView:
         MovieNightInvitationFactory(invitee=user, movie_night=movie_night2)
 
         # Filter movie nights starting within 3 days from now
-        start_from = timezone.now().strftime('%Y-%m-%d')  # Date format
-        start_to = (timezone.now() + timezone.timedelta(days=3)).strftime('%Y-%m-%d')
+        start_from = timezone.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')  # Date format
+        start_to = (timezone.now() + timezone.timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         # Filter movie nights starting within 3 days from now
         url = reverse('invited_movienight_list') + f"?start_from={start_from}&start_to={start_to}"
         response = authenticated_client.get(url)

@@ -72,10 +72,11 @@ class SearchTermSerializer(serializers.ModelSerializer):
 
 class MovieNightSerializer(serializers.ModelSerializer):
     creator = serializers.ReadOnlyField(source='creator.email') 
-
+    is_creator = serializers.SerializerMethodField()
     class Meta:
         model = MovieNight
-        fields = ['id', 'start_time', 'creator', 'movie']
+        fields = ['id', 'start_time', 'creator', 'movie', 'is_creator']
+        read_only = ['is_creator']
         
     def validate_start_time(self, value):
         """
@@ -84,14 +85,20 @@ class MovieNightSerializer(serializers.ModelSerializer):
         if value <= timezone.now():
             raise serializers.ValidationError("Start time must be in the future.")
         return value
+    
+    def get_is_creator(self, obj):
+        request = self.context.get('request', None)
+        return request and obj.creator == request.user
 
-class MovieNightDetailSerializer(serializers.ModelSerializer):
+class MovieNightDetailSerializer(MovieNightSerializer):
     creator = serializers.ReadOnlyField(source='creator.email') 
     pending_invitees = serializers.SerializerMethodField()
     participants = serializers.SerializerMethodField()
+
     class Meta:
         model = MovieNight
         fields = "__all__"
+
 
     def validate_creator(self, value):
         """

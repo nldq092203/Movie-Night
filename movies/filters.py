@@ -53,10 +53,10 @@ class MovieFilterSet(filters.FilterSet):
         ]
 
 class MyMovieNightFilterSet(filters.FilterSet):
-    start_from = filters.DateFilter(
+    start_from = filters.DateTimeFilter(
         field_name="start_time", lookup_expr="gte", label="Start Time From"
     )
-    start_to = filters.DateFilter(
+    start_to = filters.DateTimeFilter(
         field_name="start_time", lookup_expr="lte", label="Start Time To"
     )
     class Meta:
@@ -70,10 +70,10 @@ class ParticipatingMovieNightFilterSet(filters.FilterSet):
     - creator
     - invitee (based on invitations)
     """
-    start_from = filters.DateFilter(
+    start_from = filters.DateTimeFilter(
         field_name="start_time", lookup_expr="gte", label="Start Time From"
     )
-    start_to = filters.DateFilter(
+    start_to = filters.DateTimeFilter(
         field_name="start_time", lookup_expr="lte", label="Start Time To"
     )
     
