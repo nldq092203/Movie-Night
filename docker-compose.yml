@@ -1,13 +1,15 @@
 services:
+  # Django Backend
   web:
     build:
-      context: ./
+      context: ./backend         # Set to the backend directory
+      dockerfile: Dockerfile      # Use the Dockerfile in the backend directory
     command: >
       sh -c "
       python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./:/app
+      - ./backend:/app           # Mount the backend code for development
     env_file:
       - ./.env
     ports:
@@ -16,6 +18,7 @@ services:
       - db
       - redis
 
+  # PostgreSQL Database
   db:
     image: postgres:13
     volumes:
@@ -27,38 +30,58 @@ services:
     ports:
       - "5432:5432"
 
+  # Redis
   redis:
     image: redis:6-alpine
     ports:
       - "6379:6379"
 
+  # Celery Worker
   celery:
     build:
-      context: ./
+      context: ./backend         # Use the backend Dockerfile
+      dockerfile: Dockerfile
     command: >
       sh -c "
       celery -A movienight worker --loglevel=INFO"
     volumes:
-      - ./:/app
+      - ./backend:/app           # Mount the backend code for development
     env_file:
       - ./.env
     depends_on:
       - web
       - redis
 
+  # Celery Beat
   celery-beat:
     build:
-      context: ./
+      context: ./backend         # Use the backend Dockerfile
+      dockerfile: Dockerfile
     command: >
       sh -c "
       celery -A movienight beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     volumes:
-      - ./:/app
+      - ./backend:/app           # Mount the backend code for development
     env_file:
       - ./.env
     depends_on:
       - web
       - redis
+
+  # Frontend (React with Vite)
+  frontend:
+    build:
+      context: ./frontend        # Set to the frontend directory
+      dockerfile: Dockerfile     # Use the Dockerfile in the frontend directory
+    ports:
+      - "5173:5173"              # Expose the Vite development server port
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000  # Set backend API URL for development
+    volumes:
+      - ./frontend:/app          # Mount frontend code for hot reloading
+    command: npm run dev         # Run Vite in development mode
+    depends_on:
+      - web                      # Ensure backend is running for API requests
 
 volumes:
   postgres_data: {}
