@@ -4,6 +4,7 @@ import MovieCard from './MovieCard'; // Component to display individual movies
 import FilterDropdown from './FilterDropDown'; // Filter Dropdown Component
 import UserDropdown from './UserDropDown'; // User Dropdown Component
 import SearchBar from './SearchBar';
+import NotificationDropdown from './NotificationDropDown'; // Notification Dropdown Component
 
 function HomePage() {
   const [movies, setMovies] = useState([]);
@@ -109,7 +110,7 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white relative">
+    <div className="min-h-screen bg-black text-white relative">
       {/* Filter Dropdown always at top-left */}
       <FilterDropdown
         filters={filters}
@@ -124,7 +125,7 @@ function HomePage() {
       <UserDropdown />
 
       {/* Search Bar (fixed at the top-center of the screen with matching background) */}
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-b from-gray-900 to-gray-800 p-4 rounded-lg shadow-lg">
+      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black p-4 rounded-lg shadow-lg">
         <SearchBar onSearch={handleSearch} />
       </div>
 
@@ -152,6 +153,9 @@ function HomePage() {
           </>
         )}
       </div>
+
+      {/* Notification Dropdown at right-bottom corner */}
+      <NotificationDropdown />
     </div>
   );
 }

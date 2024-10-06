@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html, body {
-    background: linear-gradient(to bottom, #1a202c, #2d3748); /* Matches bg-gradient-to-b from-gray-900 to-gray-800 */
+    background: black; 
     min-height: 100%;
     margin: 0;
     padding: 0;

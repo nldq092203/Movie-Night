@@ -35,7 +35,7 @@ function MovieDetails() {
   if (!movie) return <p className="text-center">Loading...</p>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
       {/* UserDropdown at the top-right corner */}
       <div className="absolute top-4 right-4">
         <UserDropdown />

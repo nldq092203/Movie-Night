@@ -103,7 +103,7 @@ function MovieSearch() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white relative">
+    <div className="min-h-screen bg-black text-white relative">
       {/* Sticky Header (Search Bar, Filter Button, and User Dropdown) */}
       <div className="sticky top-0 z-10 bg-gray-900 shadow-lg p-4 flex justify-between items-center">
         <div className="flex space-x-4">
