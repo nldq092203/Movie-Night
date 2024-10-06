@@ -31,6 +31,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description View for listing all genres ordered by "name'
+         *
+         *     - GET: Lists all genres available in the system. */
         get: operations["api_v1_genres_list"];
         put?: never;
         post?: never;
@@ -47,6 +50,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description View for retrieving the details of a specific genre.
+         *
+         *     - GET: Retrieve details of a specific genre by its ID. */
         get: operations["api_v1_genres_retrieve"];
         put?: never;
         post?: never;
@@ -149,12 +155,32 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description View for retrieving, updating, or deleting a MovieNightInvitation instance.
+         *
+         *     - GET: Retrieve details of a specific movie night invitation.
+         *     - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+         *     - DELETE: Remove a movie night invitation if the user is the invitee. */
         get: operations["api_v1_movienight_invitations_retrieve"];
+        /** @description View for retrieving, updating, or deleting a MovieNightInvitation instance.
+         *
+         *     - GET: Retrieve details of a specific movie night invitation.
+         *     - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+         *     - DELETE: Remove a movie night invitation if the user is the invitee. */
         put: operations["api_v1_movienight_invitations_update"];
         post?: never;
+        /** @description View for retrieving, updating, or deleting a MovieNightInvitation instance.
+         *
+         *     - GET: Retrieve details of a specific movie night invitation.
+         *     - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+         *     - DELETE: Remove a movie night invitation if the user is the invitee. */
         delete: operations["api_v1_movienight_invitations_destroy"];
         options?: never;
         head?: never;
+        /** @description View for retrieving, updating, or deleting a MovieNightInvitation instance.
+         *
+         *     - GET: Retrieve details of a specific movie night invitation.
+         *     - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+         *     - DELETE: Remove a movie night invitation if the user is the invitee. */
         patch: operations["api_v1_movienight_invitations_partial_update"];
         trace?: never;
     };
@@ -215,7 +241,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Search for movies based on a search term. */
+        /** @description Search for movies based on a search term. This view initiates a background task using Celery to fetch results, and returns a 302 redirect based on task completion. */
         post: operations["api_v1_movies_search_create"];
         delete?: never;
         options?: never;
@@ -281,6 +307,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["api_v1_notifications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{id}/mark-read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description API view to mark a specific notification as read.
+         *
+         *     - PATCH: Marks the specified notification as `is_read=True` for the authenticated user. */
+        put: operations["api_v1_notifications_mark_read_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Mark a specific notification as read for the authenticated user. */
+        patch: operations["api_v1_notifications_mark_read_partial_update"];
+        trace?: never;
+    };
     "/api/v1/profiles/{email}/": {
         parameters: {
             query?: never;
@@ -293,6 +355,22 @@ export interface paths {
         get: operations["api_v1_profiles_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/google/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_google_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -519,15 +597,21 @@ export interface components {
             uid: string;
             token: string;
         };
+        /** @description Serializer for the Genre model. Validates and serializes genre data. */
         Genre: {
             readonly id: number;
             name: string;
         };
+        /** @description Serializer for the Movie model. Serializes basic movie information. */
         Movie: {
+            readonly id: number;
             imdb_id: string;
             title: string;
             year: number;
+            /** Format: uri */
+            url_poster: string;
         };
+        /** @description Serializer for detailed Movie information, including genres. */
         MovieDetail: {
             readonly id: number;
             genres: string[];
@@ -543,6 +627,7 @@ export interface components {
             url_poster: string;
             is_full_record?: boolean;
         };
+        /** @description Serializer for MovieNight model. Includes fields for the creator, movie, and start time. */
         MovieNight: {
             readonly id: number;
             /** Format: date-time */
@@ -553,35 +638,68 @@ export interface components {
              */
             readonly creator: string;
             movie: number;
+            readonly is_creator: string;
         };
+        /** @description Detailed serializer for MovieNight, adding pending invitees and participants information. */
         MovieNightDetail: {
             readonly id: number;
+            movie: number;
+            /** Format: date-time */
+            start_time: string;
             /**
              * Email address
              * Format: email
              */
             readonly creator: string;
-            /** @description Get all invitees who haven't confirmed yet. Only return the pending invitees if
-             *     the requesting user is the creator. */
-            readonly pending_invitees: string[];
-            /** @description Get all invitees who have confirmed attendance.
-             *     This method returns a list of emails for users who have confirmed their attendance. */
-            readonly participants: string[];
-            /** Format: date-time */
-            start_time: string;
             start_notification_sent?: boolean;
-            movie: number;
+            start_notification_before?: string;
+            /** @description Retrieve emails of invitees who haven't confirmed yet,
+             *     but only return this data if the requesting user is the creator. */
+            readonly pending_invitees: string[];
+            /** @description Retrieve emails of invitees who have confirmed their attendance. */
+            readonly participants: string[];
+            readonly is_creator: string;
         };
+        /** @description Serializer for MovieNightInvitation model. Handles the invitee and invitation data. */
         MovieNightInvitation: {
             readonly id: number;
             /** Format: email */
             invitee: string;
-            /** Format: date-time */
-            readonly invited_time: string;
+            movie_night: number;
             attendance_confirmed?: boolean;
             is_attending?: boolean;
-            movie_night: number;
         };
+        /** @description Serializer for a search term input for searching movies.
+         *     This serializer only handles a single field: 'term'. */
+        MovieSearch: {
+            term: string;
+        };
+        /** @description Serializer for Notification model. Serializes notification data including sender, recipient,
+         *     and related content object. */
+        Notification: {
+            readonly id: number;
+            /** Format: email */
+            readonly recipient_email: string;
+            /** Format: email */
+            readonly sender_email: string | null;
+            notification_type: components["schemas"]["NotificationTypeEnum"];
+            is_read?: boolean;
+            content_type: number;
+            object_id: number;
+            readonly content_object: string;
+            message?: string;
+            /** Format: date-time */
+            readonly timestamp: string;
+        };
+        /**
+         * @description * `INV` - Invitation
+         *     * `REM` - Reminder
+         *     * `RES` - Response
+         *     * `UPD` - Update
+         *     * `CAN` - Cancellation
+         * @enum {string}
+         */
+        NotificationTypeEnum: "INV" | "REM" | "RES" | "UPD" | "CAN";
         PaginatedGenreList: {
             /** @example 123 */
             count: number;
@@ -642,6 +760,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["MovieNight"][];
         };
+        PaginatedNotificationList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Notification"][];
+        };
         PaginatedUserList: {
             /** @example 123 */
             count: number;
@@ -663,33 +796,51 @@ export interface components {
             new_password: string;
             re_new_password: string;
         };
+        /** @description Detailed serializer for MovieNight, adding pending invitees and participants information. */
         PatchedMovieNightDetail: {
             readonly id?: number;
+            movie?: number;
+            /** Format: date-time */
+            start_time?: string;
             /**
              * Email address
              * Format: email
              */
             readonly creator?: string;
-            /** @description Get all invitees who haven't confirmed yet. Only return the pending invitees if
-             *     the requesting user is the creator. */
-            readonly pending_invitees?: string[];
-            /** @description Get all invitees who have confirmed attendance.
-             *     This method returns a list of emails for users who have confirmed their attendance. */
-            readonly participants?: string[];
-            /** Format: date-time */
-            start_time?: string;
             start_notification_sent?: boolean;
-            movie?: number;
+            start_notification_before?: string;
+            /** @description Retrieve emails of invitees who haven't confirmed yet,
+             *     but only return this data if the requesting user is the creator. */
+            readonly pending_invitees?: string[];
+            /** @description Retrieve emails of invitees who have confirmed their attendance. */
+            readonly participants?: string[];
+            readonly is_creator?: string;
         };
+        /** @description Serializer for MovieNightInvitation model. Handles the invitee and invitation data. */
         PatchedMovieNightInvitation: {
             readonly id?: number;
             /** Format: email */
             invitee?: string;
-            /** Format: date-time */
-            readonly invited_time?: string;
+            movie_night?: number;
             attendance_confirmed?: boolean;
             is_attending?: boolean;
-            movie_night?: number;
+        };
+        /** @description Serializer for Notification model. Serializes notification data including sender, recipient,
+         *     and related content object. */
+        PatchedNotification: {
+            readonly id?: number;
+            /** Format: email */
+            readonly recipient_email?: string;
+            /** Format: email */
+            readonly sender_email?: string | null;
+            notification_type?: components["schemas"]["NotificationTypeEnum"];
+            is_read?: boolean;
+            content_type?: number;
+            object_id?: number;
+            readonly content_object?: string;
+            message?: string;
+            /** Format: date-time */
+            readonly timestamp?: string;
         };
         PatchedUser: {
             /**
@@ -740,6 +891,8 @@ export interface components {
             password: string;
             re_password: string;
         };
+        /** @description Serializer for the UserProfile model.
+         *     Handles all fields of the UserProfile model. */
         UserProfile: {
             readonly id: number;
             bio: string;
@@ -1214,8 +1367,15 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovieSearch"];
+                "application/x-www-form-urlencoded": components["schemas"]["MovieSearch"];
+                "multipart/form-data": components["schemas"]["MovieSearch"];
+            };
+        };
         responses: {
+            /** @description Redirected to either the 'wait' page or the results page depending on task completion. */
             302: {
                 headers: {
                     [name: string]: unknown;
@@ -1224,6 +1384,7 @@ export interface operations {
                     "application/json": string;
                 };
             };
+            /** @description Invalid input data. The request failed validation. The response contains error details. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1234,6 +1395,7 @@ export interface operations {
                     };
                 };
             };
+            /** @description Internal Server Error. An error occurred while processing the request. This typically happens due to Celery issues or other server problems. */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -1368,6 +1530,98 @@ export interface operations {
             };
         };
     };
+    api_v1_notifications_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedNotificationList"];
+                };
+            };
+        };
+    };
+    api_v1_notifications_mark_read_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Notification"];
+                "application/x-www-form-urlencoded": components["schemas"]["Notification"];
+                "multipart/form-data": components["schemas"]["Notification"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
+            };
+        };
+    };
+    api_v1_notifications_mark_read_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedNotification"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedNotification"];
+                "multipart/form-data": components["schemas"]["PatchedNotification"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
+            };
+            /** @description Forbidden. You are not allowed to update this notification. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Notification not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     api_v1_profiles_retrieve: {
         parameters: {
             query?: never;
@@ -1386,6 +1640,41 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserProfile"];
                 };
+            };
+        };
+    };
+    auth_google_create: {
+        parameters: {
+            query: {
+                /** @description The ID token received from Google */
+                id_token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful authentication */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ID token is required */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

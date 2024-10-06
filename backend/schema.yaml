@@ -156,6 +156,10 @@ paths:
   /api/v1/genres/:
     get:
       operationId: api_v1_genres_list
+      description: |-
+        View for listing all genres ordered by "name'
+
+        - GET: Lists all genres available in the system.
       parameters:
       - name: ordering
         required: false
@@ -189,6 +193,10 @@ paths:
   /api/v1/genres/{id}/:
     get:
       operationId: api_v1_genres_retrieve
+      description: |-
+        View for retrieving the details of a specific genre.
+
+        - GET: Retrieve details of a specific genre by its ID.
       parameters:
       - in: path
         name: id
@@ -243,7 +251,7 @@ paths:
         name: start_from
         schema:
           type: string
-          format: date
+          format: date-time
         description: Start Time From
       - in: query
         name: start_time
@@ -254,7 +262,7 @@ paths:
         name: start_to
         schema:
           type: string
-          format: date
+          format: date-time
         description: Start Time To
       tags:
       - api
@@ -458,7 +466,7 @@ paths:
         name: start_from
         schema:
           type: string
-          format: date
+          format: date-time
         description: Start Time From
       - in: query
         name: start_time
@@ -469,7 +477,7 @@ paths:
         name: start_to
         schema:
           type: string
-          format: date
+          format: date-time
         description: Start Time To
       tags:
       - api
@@ -534,6 +542,12 @@ paths:
   /api/v1/movienight-invitations/{id}/:
     get:
       operationId: api_v1_movienight_invitations_retrieve
+      description: |-
+        View for retrieving, updating, or deleting a MovieNightInvitation instance.
+
+        - GET: Retrieve details of a specific movie night invitation.
+        - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+        - DELETE: Remove a movie night invitation if the user is the invitee.
       parameters:
       - in: path
         name: id
@@ -558,6 +572,12 @@ paths:
           description: ''
     put:
       operationId: api_v1_movienight_invitations_update
+      description: |-
+        View for retrieving, updating, or deleting a MovieNightInvitation instance.
+
+        - GET: Retrieve details of a specific movie night invitation.
+        - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+        - DELETE: Remove a movie night invitation if the user is the invitee.
       parameters:
       - in: path
         name: id
@@ -594,6 +614,12 @@ paths:
           description: ''
     patch:
       operationId: api_v1_movienight_invitations_partial_update
+      description: |-
+        View for retrieving, updating, or deleting a MovieNightInvitation instance.
+
+        - GET: Retrieve details of a specific movie night invitation.
+        - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+        - DELETE: Remove a movie night invitation if the user is the invitee.
       parameters:
       - in: path
         name: id
@@ -629,6 +655,12 @@ paths:
           description: ''
     delete:
       operationId: api_v1_movienight_invitations_destroy
+      description: |-
+        View for retrieving, updating, or deleting a MovieNightInvitation instance.
+
+        - GET: Retrieve details of a specific movie night invitation.
+        - PUT/PATCH: Update details of a movie night invitation if the user is the invitee.
+        - DELETE: Remove a movie night invitation if the user is the invitee.
       parameters:
       - in: path
         name: id
@@ -776,9 +808,23 @@ paths:
   /api/v1/movies/search/:
     post:
       operationId: api_v1_movies_search_create
-      description: Search for movies based on a search term.
+      description: Search for movies based on a search term. This view initiates a
+        background task using Celery to fetch results, and returns a 302 redirect
+        based on task completion.
       tags:
       - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieSearch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MovieSearch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MovieSearch'
+        required: true
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -793,21 +839,35 @@ paths:
             application/json:
               schema:
                 type: string
-          description: ''
+          description: Redirected to either the 'wait' page or the results page depending
+            on task completion.
         '400':
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
-          description: ''
+              examples:
+                InvalidInput:
+                  value:
+                    term:
+                    - This field is required.
+                  summary: Invalid Input
+          description: Invalid input data. The request failed validation. The response
+            contains error details.
         '500':
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
-          description: ''
+              examples:
+                ServerError:
+                  value:
+                    error: An error occurred while processing your request.
+                  summary: Server Error
+          description: Internal Server Error. An error occurred while processing the
+            request. This typically happens due to Celery issues or other server problems.
   /api/v1/movies/search-results/:
     get:
       operationId: api_v1_movies_search_results_list
@@ -917,7 +977,7 @@ paths:
         name: start_from
         schema:
           type: string
-          format: date
+          format: date-time
         description: Start Time From
       - in: query
         name: start_time
@@ -928,7 +988,7 @@ paths:
         name: start_to
         schema:
           type: string
-          format: date
+          format: date-time
         description: Start Time To
       tags:
       - api
@@ -981,6 +1041,119 @@ paths:
               schema:
                 $ref: '#/components/schemas/MovieNight'
           description: ''
+  /api/v1/notifications/:
+    get:
+      operationId: api_v1_notifications_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/v1/notifications/{id}/mark-read/:
+    put:
+      operationId: api_v1_notifications_mark_read_update
+      description: |-
+        API view to mark a specific notification as read.
+
+        - PATCH: Marks the specified notification as `is_read=True` for the authenticated user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    patch:
+      operationId: api_v1_notifications_mark_read_partial_update
+      description: Mark a specific notification as read for the authenticated user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+        '403':
+          description: Forbidden. You are not allowed to update this notification.
+        '404':
+          description: Notification not found.
   /api/v1/profiles/{email}/:
     get:
       operationId: api_v1_profiles_retrieve
@@ -1009,6 +1182,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserProfile'
           description: ''
+  /auth/google/:
+    post:
+      operationId: auth_google_create
+      parameters:
+      - in: query
+        name: id_token
+        schema:
+          type: string
+        description: The ID token received from Google
+        required: true
+      tags:
+      - auth
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - {}
+      responses:
+        '200':
+          description: Successful authentication
+        '400':
+          description: ID token is required
+        '401':
+          description: Unauthorized
   /auth/token/:
     post:
       operationId: auth_token_create
@@ -1614,6 +1814,8 @@ components:
       - uid
     Genre:
       type: object
+      description: Serializer for the Genre model. Validates and serializes genre
+        data.
       properties:
         id:
           type: integer
@@ -1625,7 +1827,11 @@ components:
       - name
     Movie:
       type: object
+      description: Serializer for the Movie model. Serializes basic movie information.
       properties:
+        id:
+          type: integer
+          readOnly: true
         imdb_id:
           type: string
           maxLength: 50
@@ -1634,12 +1840,21 @@ components:
           type: string
         year:
           type: integer
+          maximum: 2147483647
+          minimum: 0
+        url_poster:
+          type: string
+          format: uri
+          maxLength: 200
       required:
+      - id
       - imdb_id
       - title
+      - url_poster
       - year
     MovieDetail:
       type: object
+      description: Serializer for detailed Movie information, including genres.
       properties:
         id:
           type: integer
@@ -1656,8 +1871,12 @@ components:
           type: string
         year:
           type: integer
+          maximum: 2147483647
+          minimum: 0
         runtime_minutes:
           type: integer
+          maximum: 2147483647
+          minimum: 0
           nullable: true
         plot:
           type: string
@@ -1683,6 +1902,8 @@ components:
       - year
     MovieNight:
       type: object
+      description: Serializer for MovieNight model. Includes fields for the creator,
+        movie, and start time.
       properties:
         id:
           type: integer
@@ -1697,54 +1918,66 @@ components:
           readOnly: true
         movie:
           type: integer
+        is_creator:
+          type: string
+          readOnly: true
       required:
       - creator
       - id
+      - is_creator
       - movie
       - start_time
     MovieNightDetail:
       type: object
+      description: Detailed serializer for MovieNight, adding pending invitees and
+        participants information.
       properties:
         id:
           type: integer
           readOnly: true
+        movie:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
         creator:
           type: string
           format: email
           title: Email address
           readOnly: true
+        start_notification_sent:
+          type: boolean
+        start_notification_before:
+          type: string
         pending_invitees:
           type: array
           items:
             type: string
           description: |-
-            Get all invitees who haven't confirmed yet. Only return the pending invitees if
-            the requesting user is the creator.
+            Retrieve emails of invitees who haven't confirmed yet,
+            but only return this data if the requesting user is the creator.
           readOnly: true
         participants:
           type: array
           items:
             type: string
-          description: |-
-            Get all invitees who have confirmed attendance.
-            This method returns a list of emails for users who have confirmed their attendance.
+          description: Retrieve emails of invitees who have confirmed their attendance.
           readOnly: true
-        start_time:
+        is_creator:
           type: string
-          format: date-time
-        start_notification_sent:
-          type: boolean
-        movie:
-          type: integer
+          readOnly: true
       required:
       - creator
       - id
+      - is_creator
       - movie
       - participants
       - pending_invitees
       - start_time
     MovieNightInvitation:
       type: object
+      description: Serializer for MovieNightInvitation model. Handles the invitee
+        and invitation data.
       properties:
         id:
           type: integer
@@ -1752,21 +1985,87 @@ components:
         invitee:
           type: string
           format: email
-        invited_time:
-          type: string
-          format: date-time
-          readOnly: true
+        movie_night:
+          type: integer
         attendance_confirmed:
           type: boolean
         is_attending:
           type: boolean
-        movie_night:
-          type: integer
       required:
       - id
-      - invited_time
       - invitee
       - movie_night
+    MovieSearch:
+      type: object
+      description: |-
+        Serializer for a search term input for searching movies.
+        This serializer only handles a single field: 'term'.
+      properties:
+        term:
+          type: string
+          maxLength: 255
+      required:
+      - term
+    Notification:
+      type: object
+      description: |-
+        Serializer for Notification model. Serializes notification data including sender, recipient,
+        and related content object.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        recipient_email:
+          type: string
+          format: email
+          readOnly: true
+        sender_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        is_read:
+          type: boolean
+        content_type:
+          type: integer
+        object_id:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        content_object:
+          type: string
+          readOnly: true
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_object
+      - content_type
+      - id
+      - notification_type
+      - object_id
+      - recipient_email
+      - sender_email
+      - timestamp
+    NotificationTypeEnum:
+      enum:
+      - INV
+      - REM
+      - RES
+      - UPD
+      - CAN
+      type: string
+      description: |-
+        * `INV` - Invitation
+        * `REM` - Reminder
+        * `RES` - Response
+        * `UPD` - Update
+        * `CAN` - Cancellation
     PaginatedGenreList:
       type: object
       required:
@@ -1859,6 +2158,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MovieNight'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
     PaginatedUserList:
       type: object
       required:
@@ -1900,40 +2222,47 @@ components:
       - uid
     PatchedMovieNightDetail:
       type: object
+      description: Detailed serializer for MovieNight, adding pending invitees and
+        participants information.
       properties:
         id:
           type: integer
           readOnly: true
+        movie:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
         creator:
           type: string
           format: email
           title: Email address
           readOnly: true
+        start_notification_sent:
+          type: boolean
+        start_notification_before:
+          type: string
         pending_invitees:
           type: array
           items:
             type: string
           description: |-
-            Get all invitees who haven't confirmed yet. Only return the pending invitees if
-            the requesting user is the creator.
+            Retrieve emails of invitees who haven't confirmed yet,
+            but only return this data if the requesting user is the creator.
           readOnly: true
         participants:
           type: array
           items:
             type: string
-          description: |-
-            Get all invitees who have confirmed attendance.
-            This method returns a list of emails for users who have confirmed their attendance.
+          description: Retrieve emails of invitees who have confirmed their attendance.
           readOnly: true
-        start_time:
+        is_creator:
           type: string
-          format: date-time
-        start_notification_sent:
-          type: boolean
-        movie:
-          type: integer
+          readOnly: true
     PatchedMovieNightInvitation:
       type: object
+      description: Serializer for MovieNightInvitation model. Handles the invitee
+        and invitation data.
       properties:
         id:
           type: integer
@@ -1941,16 +2270,49 @@ components:
         invitee:
           type: string
           format: email
-        invited_time:
-          type: string
-          format: date-time
-          readOnly: true
+        movie_night:
+          type: integer
         attendance_confirmed:
           type: boolean
         is_attending:
           type: boolean
-        movie_night:
+    PatchedNotification:
+      type: object
+      description: |-
+        Serializer for Notification model. Serializes notification data including sender, recipient,
+        and related content object.
+      properties:
+        id:
           type: integer
+          readOnly: true
+        recipient_email:
+          type: string
+          format: email
+          readOnly: true
+        sender_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        is_read:
+          type: boolean
+        content_type:
+          type: integer
+        object_id:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        content_object:
+          type: string
+          readOnly: true
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedUser:
       type: object
       properties:
@@ -2051,6 +2413,9 @@ components:
       - re_password
     UserProfile:
       type: object
+      description: |-
+        Serializer for the UserProfile model.
+        Handles all fields of the UserProfile model.
       properties:
         id:
           type: integer

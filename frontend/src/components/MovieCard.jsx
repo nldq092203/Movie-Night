@@ -12,6 +12,7 @@ function MovieCard({ movie }) {
     // If the user is not authenticated, redirect them to the login page
     if (!isAuthenticated) {
       e.preventDefault(); // Prevent default navigation
+      console.log("Redirect to login")
       navigate('/login'); // Redirect to login
     }
   };
