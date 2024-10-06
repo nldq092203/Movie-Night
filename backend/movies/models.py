@@ -127,7 +127,7 @@ class Notification(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')  # Links notification to any model
     message = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now=True)  # Automatically updated with the current timestamp when changed
-
+    is_seen = models.BooleanField(default=False, db_index=True)
 
 class MovieNight(models.Model):
     """

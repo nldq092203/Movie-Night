@@ -16,7 +16,8 @@ from movies.views import (
     GenreDetailView,
     ProfileView, 
     MyNotificationView,
-    MarkReadNotificationView
+    MarkReadNotificationView,
+    MarkAllAsSeenView
 )
 
 urlpatterns = [
@@ -36,7 +37,8 @@ urlpatterns = [
     path('genres/<str:pk>/', GenreDetailView.as_view(), name="genre_detail"),
     path('profiles/<str:email>/', ProfileView.as_view(), name='profile_by_email'),
     path('notifications/', MyNotificationView.as_view(), name='my_notifications'),
-    path('notifications/<str:pk>/mark-read/', MarkReadNotificationView.as_view(), name='mark_read_notification')
+    path('notifications/<str:pk>/mark-read/', MarkReadNotificationView.as_view(), name='mark_read_notification'),
+    path('notifications/mark-all-seen/', MarkAllAsSeenView.as_view(), name='mark_all_seen'),
 ]
 
 """

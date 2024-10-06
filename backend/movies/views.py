@@ -534,7 +534,55 @@ class MarkReadNotificationView(UpdateAPIView):
         serializer = self.get_serializer(notification)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class MarkAllAsSeenView(APIView):
+    """
+        Marks all notifications as seen for the authenticated user.
+        This endpoint is restricted to authenticated users.
+    """
+    permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        description="Marks all notifications as seen for the authenticated user",
+        responses={
+            200: {
+                "description": "All notifications marked as seen",
+                "examples": {
+                    "application/json": {
+                        "message": "All notifications marked as seen."
+                    }
+                },
+            },
+            204: {
+                "description": "No unseen notifications found",
+                "examples": {
+                    "application/json": {
+                        "message": "No unseen notifications found."
+                    }
+                },
+            },
+            401: {
+                "description": "Unauthorized request",
+                "examples": {
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                },
+            },
+        }
+    )
+    def patch(self, request, *args, **kwargs):
+        """
+        Marks all notifications as seen for the authenticated user.
+        """
+        # Fetch all unread notifications for the authenticated user
+        notifications = Notification.objects.filter(recipient=request.user, is_seen=False)
+
+        # Update the is_seen field for these notifications
+        if notifications.exists():
+            notifications.update(is_seen=True)
+            return Response({"message": "All notifications marked as seen."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "No unseen notifications found."}, status=status.HTTP_204_NO_CONTENT)
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com
 """

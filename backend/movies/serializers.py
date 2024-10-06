@@ -254,7 +254,8 @@ class NotificationSerializer(serializers.ModelSerializer):
             'object_id', 
             'content_object', 
             'message', 
-            'timestamp'
+            'timestamp',
+            'is_seen'
         ]
         read_only_fields = ['timestamp']
 

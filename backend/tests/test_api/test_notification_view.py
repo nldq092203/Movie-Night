@@ -147,6 +147,50 @@ class TestMarkReadNotificationView:
         # Assert that the response is 404 Not Found
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+@pytest.mark.django_db
+class TestMarkAllAsSeenView:
+
+    def test_mark_all_as_seen(self, authenticated_client, user):
+        """
+        Test that all notifications for the authenticated user are marked as seen.
+        """
+        # Create notifications for the authenticated user
+        NotificationFactory(recipient=user, is_seen=False)
+        NotificationFactory(recipient=user, is_seen=False)
+
+        url = reverse('mark_all_seen')  # Ensure this matches your URL name
+        response = authenticated_client.patch(url)
+
+        # Assert that the response is successful
+        assert response.status_code == status.HTTP_200_OK
+
+        # Fetch all notifications and check that they are now marked as seen
+        notifications = Notification.objects.filter(recipient=user)
+        assert all(notification.is_seen for notification in notifications)  # All should be seen
+
+    def test_no_unseen_notifications(self, authenticated_client, user):
+        """
+        Test that when there are no unseen notifications, the API returns a 204 status.
+        """
+        # Create notifications that are already seen
+        NotificationFactory(recipient=user, is_seen=True)
+
+        url = reverse('mark_all_seen')  # Ensure this matches your URL name
+        response = authenticated_client.patch(url)
+
+        # Assert that the response status is 204 No Content
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert response.data['message'] == "No unseen notifications found."
+
+    def test_unauthenticated_user_cannot_mark_all_as_seen(self, any_client):
+        """
+        Test that unauthenticated users cannot mark notifications as seen.
+        """
+        url = reverse('mark_all_seen')
+        response = any_client.patch(url)
+
+        # Assert that the response is 401 Unauthorized
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com
