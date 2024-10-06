@@ -272,10 +272,19 @@ class NotificationSerializer(serializers.ModelSerializer):
         Customize how the related object (content_object) is serialized based on its type.
         """
         content_object = obj.content_object
+        
+        # If the content object is a MovieNight
         if isinstance(content_object, MovieNight):
             return MovieNightSerializer(content_object).data
+        
+        # If the content object is a MovieNightInvitation
         elif isinstance(content_object, MovieNightInvitation):
-            return MovieNightInvitationSerializer(content_object).data
+            # Get the serialized data and include the movie_night.id field
+            invitation_data = MovieNightInvitationSerializer(content_object).data
+            invitation_data['movie_night_id'] = content_object.movie_night.id
+            return invitation_data
+        
+        # Default behavior for other content types
         return str(content_object)
     
 """
