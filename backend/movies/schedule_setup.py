@@ -1,6 +1,6 @@
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
-def schedule_setup():
+def schedule_setup(sender, **kwargs):
     """
     Sets up a periodic task that runs every minute to check for movies that 
     are starting soon.
@@ -12,10 +12,13 @@ def schedule_setup():
     This ensures that the system regularly checks if any movie nights are starting 
     within a specific timeframe and sends appropriate notifications.
     """
-    minute_schedule, created = IntervalSchedule.objects.get_or_create(period=IntervalSchedule.MINUTES, every=1)
+    minute_schedule, created = IntervalSchedule.objects.get_or_create(
+        period=IntervalSchedule.MINUTES, every=1
+    )
+    # Create or get the periodic task linked to this schedule
     # Create or get the periodic task linked to this schedule
     task, created = PeriodicTask.objects.get_or_create(
-        name="Test movie start time each minute",
+        name="Check movie start times every minute",
         interval=minute_schedule,
         task='movies.tasks.notify_of_starting_soon',
         enabled=True

@@ -68,21 +68,21 @@ services:
       - web
       - redis
 
-  # # Frontend (React with Vite)
-  # frontend:
-  #   build:
-  #     context: ./frontend        # Set to the frontend directory
-  #     dockerfile: Dockerfile     # Use the Dockerfile in the frontend directory
-  #   ports:
-  #     - "5173:5173"              # Expose the Vite development server port
-  #   environment:
-  #     - REACT_APP_API_URL=http://localhost:8000  # Set backend API URL for development
-  #     - CHOKIDAR_USEPOLLING=true  # Enable polling to detect file changes in Docker
-  #   volumes:
-  #     - ./frontend:/app          # Mount frontend code for hot reloading
-  #   command: npm run dev         # Run Vite in development mode
-  #   depends_on:
-  #     - web                      # Ensure backend is running for API requests
+  # Frontend (React with Vite)
+  frontend:
+    build:
+      context: ./frontend        # Set to the frontend directory
+      dockerfile: Dockerfile     # Use the Dockerfile in the frontend directory
+    ports:
+      - "5173:5173"              # Expose the Vite development server port
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000  # Set backend API URL for development
+      - CHOKIDAR_USEPOLLING=true  # Enable polling to detect file changes in Docker
+    volumes:
+      - ./frontend:/app          # Mount frontend code for hot reloading
+    command: npm run dev         # Run Vite in development mode
+    depends_on:
+      - web                      # Ensure backend is running for API requests
 
 volumes:
   postgres_data: {}
