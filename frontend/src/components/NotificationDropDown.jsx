@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { useMovieNightContext } from '../context/MovieNightContext';
@@ -61,9 +61,34 @@ function NotificationDropdown() {
     setOpen(!open);
   };
 
-  const handleNotificationClick = (notification) => {
-    const { notification_type, object_id, content_object } = notification;
+  // Function to mark a notification as read
+  const markAsRead = async (notificationId) => {
+    const accessToken = localStorage.getItem('access_token');
+    try {
+      const response = await fetch(`http://0.0.0.0:8000/api/v1/notifications/${notificationId}/mark-read/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  const handleNotificationClick = (notification) => {
+    const { id, notification_type, object_id, content_object } = notification;
+
+    // Mark notification as read
+    if(!notification.is_read){
+      markAsRead(id);
+    }
+
+    // Handle navigation and actions based on notification type
     if (['REM', 'UPD'].includes(notification_type)) {
       navigate(`/movie-nights/${object_id}`);
     } else if (notification_type === 'CAN') {
@@ -92,7 +117,6 @@ function NotificationDropdown() {
 
   return (
     <div className="fixed bottom-5 right-5 z-50">
-      {/* Notification Bell Button */}
       <div className="relative">
         <button
           onClick={toggleDropdown}
@@ -106,13 +130,11 @@ function NotificationDropdown() {
           )}
         </button>
 
-        {/* Right-bottom Notification Panel that drops up */}
         {open && (
-          <div className="absolute right-0 bottom-full mb-4 w-96 bg-black text-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 max-h-96 overflow-y-auto transition-transform transform ">
+          <div className="absolute right-0 bottom-full mb-4 w-96 bg-black text-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 max-h-96 overflow-y-auto transition-transform transform">
             <div className="py-2">
               <h2 className="text-xl font-bold px-4 mb-2">Notifications</h2>
 
-              {/* Filters Section */}
               <div className="px-4 flex space-x-2 mb-2">
                 <select
                   className="bg-gray-800 text-white px-2 py-1 rounded"
@@ -133,12 +155,11 @@ function NotificationDropdown() {
                   <option value="UPD">Updates</option>
                   <option value="REM">Reminders</option>
                   <option value="CAN">Cancels</option>
+                  <option value="RES">Responses</option>
                 </select>
               </div>
 
-              {/* Notification Sections */}
               <div className="divide-y divide-gray-600">
-                {/* Section for Today */}
                 <div className="px-4 py-2">
                   <h3 className="text-lg font-semibold mb-2">This day</h3>
                   {notifications.filter(notification => isToday(notification.timestamp)).length === 0 ? (
@@ -170,7 +191,6 @@ function NotificationDropdown() {
                   )}
                 </div>
 
-                {/* Section for This Week */}
                 <div className="px-4 py-2">
                   <h3 className="text-lg font-semibold mb-2">This week</h3>
                   {notifications.filter(notification => !isToday(notification.timestamp)).length === 0 ? (
