@@ -314,6 +314,10 @@ class MyMovieNightView(ListCreateAPIView):
         """
         Automatically set the creator of the movie night to the current authenticated user during creation.
         """
+        # Ensure start_notification_before is set to a default value (e.g., 0) if not provided
+        if 'start_notification_before' not in serializer.validated_data:
+            serializer.validated_data['start_notification_before'] = 0
+            
         serializer.save(creator=self.request.user)
 
 class ParticipatingMovieNightView(ListAPIView):

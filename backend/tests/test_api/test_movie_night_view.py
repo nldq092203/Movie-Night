@@ -64,15 +64,17 @@ class TestMyMovieNightView:
         data = {
             "movie": movie.id,
             "start_time": timezone.now() + timedelta(days=1),
-            # "creator": user.email,
+            "start_notification_before": 1800,
             "start_notification_sent": False
         }
         response = authenticated_client.post(url, data, format='json')
-
+        logger.error(response.data)
         # Assert that the movie night was successfully created
         assert response.status_code == status.HTTP_201_CREATED
         movie_night = MovieNight.objects.get(pk=response.data["id"])
         assert movie_night.creator == user
+        assert movie_night.start_notification_before == timedelta(seconds=1800)
+        assert movie_night.start_notification_sent == False
     
     def test_my_movie_night_create_unauthenticated(self, any_client):
         """
@@ -350,7 +352,7 @@ class TestMovieNightDetailView:
             "movie": movie_night.movie.id # movie is required field
         }
         response = authenticated_client.put(url, data, format='json')
-        logger.warning(response.data)
+        logger.error(response.data)
 
         # Assert the movie night was updated
         assert response.status_code == status.HTTP_200_OK

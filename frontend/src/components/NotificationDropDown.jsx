@@ -7,7 +7,7 @@ function NotificationDropdown() {
   const [open, setOpen] = useState(false);
   const { saveInvitationData } = useMovieNightContext(); 
   const [notifications, setNotifications] = useState([]);
-  const [unseenCount, setUnseenCount] = useState(0);  // Track unseen notifications count
+  const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('ALL'); 
   const [isReadFilter, setIsReadFilter] = useState('ALL'); 
@@ -40,18 +40,14 @@ function NotificationDropdown() {
 
       const data = await response.json();
       setNotifications(data.results || []);
-      
-      // Update unseen notifications count
-      const unseenNotifications = data.results.filter(notification => !notification.is_seen);
-      setUnseenCount(unseenNotifications.length);  // Set the count of unseen notifications
-
+      setUnreadCount(data.unreadCount || 0);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
       setError('Failed to fetch notifications.');
     }
   };
 
-  // Mark all notifications as seen
+  // Function to mark all notifications as seen
   const markAllAsSeen = async () => {
     const accessToken = localStorage.getItem('access_token');
     try {
@@ -63,7 +59,8 @@ function NotificationDropdown() {
         },
       });
       if (response.ok) {
-        setUnseenCount(0);  // Reset unseen notifications count when all are marked as seen
+        // Reset the unread count
+        setUnreadCount(0);
       } else {
         throw new Error('Failed to mark all notifications as seen');
       }
@@ -113,7 +110,7 @@ function NotificationDropdown() {
     const { id, notification_type, object_id, content_object } = notification;
 
     // Mark notification as read
-    if (!notification.is_read) {
+    if(!notification.is_read){
       markAsRead(id);
     }
 
@@ -152,9 +149,9 @@ function NotificationDropdown() {
           className="bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 focus:outline-none"
         >
           <BellIcon className="h-6 w-6" />
-          {unseenCount > 0 && (  // Display the number of unseen notifications in a red badge
+          {unreadCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
-              {unseenCount}
+              {unreadCount}
             </span>
           )}
         </button>
@@ -196,6 +193,37 @@ function NotificationDropdown() {
                   ) : (
                     notifications
                       .filter(notification => isToday(notification.timestamp))
+                      .map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`py-2 flex justify-between items-center ${
+                            !notification.is_read ? 'bg-gray-800' : 'bg-gray-900'
+                          } cursor-pointer`}
+                          onClick={() => handleNotificationClick(notification)}
+                        >
+                          <div className="flex items-center">
+                            <img
+                              src="https://via.placeholder.com/40"
+                              alt="User"
+                              className="rounded-full h-8 w-8 mr-2"
+                            />
+                            <div>
+                              <p className="font-semibold text-sm">{notification.message}</p>
+                              <p className="text-xs text-gray-400">{new Date(notification.timestamp).toLocaleString()}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                  )}
+                </div>
+
+                <div className="px-4 py-2">
+                  <h3 className="text-lg font-semibold mb-2">This week</h3>
+                  {notifications.filter(notification => !isToday(notification.timestamp)).length === 0 ? (
+                    <p className="text-gray-600">No notifications this week</p>
+                  ) : (
+                    notifications
+                      .filter(notification => !isToday(notification.timestamp))
                       .map((notification) => (
                         <div
                           key={notification.id}

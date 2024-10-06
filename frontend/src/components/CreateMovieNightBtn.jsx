@@ -5,6 +5,7 @@ function CreateMovieNightBtn({ movieId }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [startTime, setStartTime] = useState('');
+  const [notificationTime, setNotificationTime] = useState('PT5M');  // Default to 5 minutes
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -12,14 +13,27 @@ function CreateMovieNightBtn({ movieId }) {
 
   const dropdownRef = useRef(null);
 
+  // Function to convert ISO 8601 duration to seconds
+  const convertDurationToSeconds = (duration) => {
+    if (duration.includes('H')) {
+      const hours = parseInt(duration.replace('PT', '').replace('H', ''), 10);
+      return hours * 3600;  // Convert hours to seconds
+    }
+    if (duration.includes('M')) {
+      const minutes = parseInt(duration.replace('PT', '').replace('M', ''), 10);
+      return minutes * 60;  // Convert minutes to seconds
+    }
+    return 0;  // Default case, if no match
+  };
+
   const handleOpenForm = () => {
     setIsFormOpen((prev) => !prev);
   };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
-    setError(null); // Clear the error when closing the form
-    setSuccess(false); // Clear the success message
+    setError(null);
+    setSuccess(false);
   };
 
   const handleFormSubmit = async (e) => {
@@ -30,11 +44,13 @@ function CreateMovieNightBtn({ movieId }) {
 
     try {
       const accessToken = localStorage.getItem('access_token');
+      const notificationInSeconds = convertDurationToSeconds(notificationTime);  // Convert to seconds
       const response = await axios.post(
         'http://0.0.0.0:8000/api/v1/my-movie-nights/',
         {
           movie: movieId,
           start_time: startTime,
+          start_notification_before: notificationInSeconds,  // Send seconds to the API
         },
         {
           headers: {
@@ -45,11 +61,10 @@ function CreateMovieNightBtn({ movieId }) {
 
       if (response.status === 201) {
         setSuccess('Movie night created successfully!');
-        fetchMovieNights(); // Fetch updated movie nights
+        fetchMovieNights();  // Fetch updated movie nights
         setIsFormOpen(false);
       }
     } catch (error) {
-      // Handling both server error responses and network errors
       const errorMessage = error.response?.data?.start_time?.[0] || 'An unexpected error occurred.';
       setError(errorMessage);
     } finally {
@@ -60,7 +75,7 @@ function CreateMovieNightBtn({ movieId }) {
   const fetchMovieNights = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      const now = new Date().toISOString()
+      const now = new Date().toISOString();
       const response = await axios.get(
         'http://0.0.0.0:8000/api/v1/my-movie-nights/',
         {
@@ -73,14 +88,14 @@ function CreateMovieNightBtn({ movieId }) {
       );
       setMovieNights(response.data.results);
     } catch (err) {
-      console.error('Error creating movie night:', error.response?.data?.detail);
+      console.error('Error creating movie night:', err.response?.data?.detail);
       setError('Failed to fetch movie nights. Please try again later.');
     }
   };
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
-    if (!isDropdownOpen) fetchMovieNights(); // Fetch movie nights when opening dropdown
+    if (!isDropdownOpen) fetchMovieNights();  // Fetch movie nights when opening dropdown
   };
 
   return (
@@ -153,6 +168,28 @@ function CreateMovieNightBtn({ movieId }) {
                   className="w-full text-gray-500 p-2 border rounded"
                   required
                 />
+              </div>
+
+              <div>
+                <label htmlFor="notificationTime" className="block text-gray-700 font-semibold mb-2">
+                  Notify me before:
+                </label>
+                <select
+                  id="notificationTime"
+                  value={notificationTime}
+                  onChange={(e) => setNotificationTime(e.target.value)}
+                  className="w-full text-gray-500 p-2 border rounded"
+                >
+                  <option value="PT5M">5 minutes before</option>
+                  <option value="PT15M">15 minutes before</option>
+                  <option value="PT30M">30 minutes before</option>
+                  <option value="PT1H">1 hour before</option>
+                  <option value="PT2H">2 hours before</option>
+                  <option value="PT3H">3 hours before</option>
+                  <option value="PT6H">6 hours before</option>
+                  <option value="PT12H">12 hours before</option>
+                  <option value="PT24H">24 hours before</option>
+                </select>
               </div>
 
               <div className="flex justify-between">

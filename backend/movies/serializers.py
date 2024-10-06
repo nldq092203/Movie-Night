@@ -9,6 +9,7 @@ from rest_framework import serializers
 from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation, UserProfile, Notification
 from movienight_auth.models import User
 from django.utils import timezone
+from datetime import timedelta
 from typing import List
 import logging
 logger = logging.getLogger(__name__)
@@ -119,7 +120,7 @@ class MovieNightSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MovieNight
-        fields = ['id', 'start_time', 'creator', 'movie', 'is_creator']
+        fields = ['id', 'start_time', 'start_notification_before', 'creator', 'movie', 'is_creator']
         read_only = ['is_creator']
 
     def validate_start_time(self, value):
