@@ -540,6 +540,7 @@ class MarkAllAsSeenView(APIView):
         This endpoint is restricted to authenticated users.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSerializer
 
     @extend_schema(
         description="Marks all notifications as seen for the authenticated user",

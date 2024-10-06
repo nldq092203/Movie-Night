@@ -343,6 +343,23 @@ export interface paths {
         patch: operations["api_v1_notifications_mark_read_partial_update"];
         trace?: never;
     };
+    "/api/v1/notifications/mark-all-seen/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Marks all notifications as seen for the authenticated user */
+        patch: operations["api_v1_notifications_mark_all_seen_partial_update"];
+        trace?: never;
+    };
     "/api/v1/profiles/{email}/": {
         parameters: {
             query?: never;
@@ -690,6 +707,7 @@ export interface components {
             message?: string;
             /** Format: date-time */
             readonly timestamp: string;
+            is_seen?: boolean;
         };
         /**
          * @description * `INV` - Invitation
@@ -841,6 +859,7 @@ export interface components {
             message?: string;
             /** Format: date-time */
             readonly timestamp?: string;
+            is_seen?: boolean;
         };
         PatchedUser: {
             /**
@@ -1619,6 +1638,47 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    api_v1_notifications_mark_all_seen_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedNotification"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedNotification"];
+                "multipart/form-data": components["schemas"]["PatchedNotification"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };

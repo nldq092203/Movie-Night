@@ -1154,6 +1154,58 @@ paths:
           description: Forbidden. You are not allowed to update this notification.
         '404':
           description: Notification not found.
+  /api/v1/notifications/mark-all-seen/:
+    patch:
+      operationId: api_v1_notifications_mark_all_seen_partial_update
+      description: Marks all notifications as seen for the authenticated user
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: All notifications marked as seen
+                examples:
+                  application/json:
+                    message: All notifications marked as seen.
+          description: ''
+        '204':
+          content:
+            application/json:
+              schema:
+                description: No unseen notifications found
+                examples:
+                  application/json:
+                    message: No unseen notifications found.
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                description: Unauthorized request
+                examples:
+                  application/json:
+                    detail: Authentication credentials were not provided.
+          description: ''
   /api/v1/profiles/{email}/:
     get:
       operationId: api_v1_profiles_retrieve
@@ -2043,6 +2095,8 @@ components:
           type: string
           format: date-time
           readOnly: true
+        is_seen:
+          type: boolean
       required:
       - content_object
       - content_type
@@ -2313,6 +2367,8 @@ components:
           type: string
           format: date-time
           readOnly: true
+        is_seen:
+          type: boolean
     PatchedUser:
       type: object
       properties:
