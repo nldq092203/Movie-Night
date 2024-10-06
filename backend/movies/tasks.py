@@ -15,14 +15,23 @@ from celery import shared_task
 from movies import omdb_integration
 from movies import notifications
 from movies.models import MovieNightInvitation, MovieNight
+import logging 
+logger = logging.getLogger(__name__)
 
 @shared_task
 def search_and_save(search):
     return omdb_integration.search_and_save(search)
 
+
+
 @shared_task
 def send_invitation(mni_pk):
-    notifications.send_invitation(MovieNightInvitation.objects.get(pk=mni_pk))
+    logger.info(f"Attempting to fetch MovieNightInvitation with pk={mni_pk}")
+    try:
+        movie_night_invitation = MovieNightInvitation.objects.get(pk=mni_pk)
+        notifications.send_invitation(movie_night_invitation)
+    except MovieNightInvitation.DoesNotExist:
+        logger.error(f"MovieNightInvitation with pk={mni_pk} does not exist")
 
 @shared_task
 def send_attendance_change(mni_pk, is_attending):
@@ -38,6 +47,12 @@ def notify_of_starting_soon():
 def send_movie_night_update(mn_pk, start_time):
     notifications.send_movie_night_update(
         MovieNight.objects.get(pk=mn_pk), start_time
+    )
+
+@shared_task
+def send_movie_night_delete(mn_pk):
+    notifications.send_movie_night_delete(
+        MovieNight.objects.get(pk=mn_pk)
     )
 
 """

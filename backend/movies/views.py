@@ -13,7 +13,8 @@ from rest_framework.generics import (
     ListAPIView, 
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
-    CreateAPIView
+    CreateAPIView,
+    UpdateAPIView
     )                     
 from rest_framework.decorators import api_view, permission_classes
 from movies.serializers import (
@@ -24,9 +25,10 @@ from movies.serializers import (
     MovieNightDetailSerializer,
     GenreSerializer, 
     UserProfileSerializer,
-    MovieSearchSerializer
+    MovieSearchSerializer,
+    NotificationSerializer
     )
-from movies.models import Movie, MovieNight, MovieNightInvitation, Genre
+from movies.models import Movie, MovieNight, MovieNightInvitation, Genre, Notification
 from django.contrib.auth import get_user_model
 from movies.tasks import search_and_save
 from movies.omdb_integration import fill_movie_details
@@ -371,7 +373,7 @@ class MyMovieNightInvitationView(ListAPIView):
     serializer_class = MovieNightInvitationSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = MovieNightInvitationFilterSet
-    ordering_fields = ["movie_night__start_time", "invited_time"]
+    ordering_fields = ["movie_night__start_time"]
 
     def get_queryset(self):
         """
@@ -450,6 +452,88 @@ class ProfileView(RetrieveAPIView):
         email = self.kwargs.get('email')
         user = get_object_or_404(User, email=email)
         return user.profile 
+
+######## Notifications ##########
+class MyNotificationView(ListAPIView):
+    serializer_class = NotificationSerializer
+    filter_fields = ["is_read", "notification_type"]
+    ordering_fields = ["timestamp"]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="is_read", 
+                type=OpenApiTypes.BOOL, 
+                location=OpenApiParameter.QUERY, 
+                description="Filter notifications based on read status. Pass `true` for read notifications, `false` for unread."
+            ),
+            OpenApiParameter(
+                name="notification_type", 
+                type=OpenApiTypes.STR, 
+                location=OpenApiParameter.QUERY, 
+                description="Filter notifications based on the type (e.g., 'INV' for invitation, 'UPD' for update)."
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(
+                description="List of notifications for the authenticated user.",
+                response=NotificationSerializer(many=True),
+            ),
+            403: OpenApiResponse(
+                description="Unauthorized. The user must be authenticated to access notifications.",
+            ),
+        },
+        description="Retrieve a list of notifications for the authenticated user. The results can be filtered based on `is_read` and `notification_type` and ordered based on `timestamp` ."
+    )
+    def get_queryset(self):
+        queryset = Notification.objects.filter(recipient=self.request.user)
+        
+        # Apply the 'is_read' filter if present in the query parameters
+        is_read = self.request.query_params.get('is_read')
+        if is_read is not None:
+            # Convert 'true'/'false' string to actual boolean value
+            queryset = queryset.filter(is_read=is_read.lower() == 'true')
+        
+        # Apply the 'notification_type' filter if present in the query parameters
+        notification_type = self.request.query_params.get('notification_type')
+        if notification_type:
+            queryset = queryset.filter(notification_type=notification_type)
+        
+        return queryset
+
+class MarkReadNotificationView(UpdateAPIView):
+    """
+    API view to mark a specific notification as read.
+    
+    - PATCH: Marks the specified notification as `is_read=True` for the authenticated user.
+    """
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Notification.objects.all()
+
+    @extend_schema(
+        responses={
+            200: NotificationSerializer,
+            403: OpenApiResponse(description="Forbidden. You are not allowed to update this notification."),
+            404: OpenApiResponse(description="Notification not found."),
+        },
+        description="Mark a specific notification as read for the authenticated user.",
+    )
+    def patch(self, request, *args, **kwargs):
+        """
+        Mark the notification as read for the authenticated user.
+        """
+        notification = get_object_or_404(Notification, pk=self.kwargs['pk'], recipient=self.request.user)
+
+        if notification.is_read:
+            return Response({"message": "Notification already marked as read."}, status=status.HTTP_200_OK)
+
+        notification.is_read = True
+        notification.save()
+        serializer = self.get_serializer(notification)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com

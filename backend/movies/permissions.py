@@ -49,3 +49,7 @@ class IsInvitee(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Only allow the invitee of the invitation to access it
         return obj.invitee == request.user
+    
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""

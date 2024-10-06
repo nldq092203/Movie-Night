@@ -41,7 +41,7 @@ function HomePage() {
           ordering: ordering ? ordering : undefined,
         },
       });
-
+      
       // Append new movies to the existing list
       setMovies((prevMovies) => [...prevMovies, ...response.data.results]);
 
@@ -135,11 +135,12 @@ function HomePage() {
 
       {/* Movie List Section */}
       <div className="container mx-auto px-10 py-10 ">
-        <h2 className="text-xl font-semibold mb-4">Movies</h2>
         {loading && !movies.length ? (
           <p className="text-center">Loading...</p>
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
+        ) : !movies.length ? (
+          <p className="text-center">No movies found. Please search for a movie.</p>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">

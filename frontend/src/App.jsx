@@ -9,7 +9,6 @@ import MovieNightDetails from './components/MovieNightDetails';
 
 function App() {
   return (
-
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />

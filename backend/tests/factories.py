@@ -4,7 +4,7 @@ Defines factories for generating test data corresponding to models.
 import factory
 from factory.django import DjangoModelFactory
 from django.contrib.auth import get_user_model
-from movies.models import UserProfile, Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation
+from movies.models import UserProfile, Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation, Notification
 from django.utils import timezone 
 UserModel = get_user_model()
 
@@ -84,6 +84,26 @@ class MovieNightInvitationFactory(DjangoModelFactory):
     invitee = factory.SubFactory(UserFactory)
     attendance_confirmed = False
     is_attending = False
+
+from django.contrib.contenttypes.models import ContentType
+
+class NotificationFactory(DjangoModelFactory):
+    """
+    Factory for the Notification model. This factory helps create Notification instances
+    for testing purposes, linking notifications to users, content objects, and ensuring
+    valid notification types.
+    """
+    class Meta:
+        model = Notification
+
+    recipient = factory.SubFactory(UserFactory)
+    sender = factory.SubFactory(UserFactory)
+    notification_type = "INV"
+    content_object = factory.SubFactory(MovieNightFactory)
+
+    @factory.lazy_attribute
+    def content_type(self):
+        return ContentType.objects.get_for_model(self.content_object)
 
 
 """
