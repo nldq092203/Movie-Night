@@ -1,12 +1,5 @@
+@import "@mantine/core/styles.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-    background: black; 
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-    color: white; /* This matches 'text-white' from Tailwind */
-    box-sizing: border-box;
-  }

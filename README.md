@@ -30,7 +30,7 @@
 ### Backend Features
 
 - **User Authentication and Authorization**: Secure user registration and login using JWT tokens, with Google OAuth2 integration.
-- **Movie Search**: Search for movies using the OMDb API and store them locally.
+- **Movie Search**: Search for movies using the OMDb API and store them locally (48h update for a search).
 - **Movie Details**: View comprehensive movie information, including genres, ratings, and full descriptions.
 - **Movie Night Creation**: Organize movie nights and invite friends seamlessly.
 - **Invitation Management**: Send, manage, and confirm invitations for movie nights.

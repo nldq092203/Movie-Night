@@ -5,10 +5,12 @@ import MovieDetails from './components/MovieDetails';
 import MovieSearch from './components/MovieSearch';
 import HomePage from './components/HomePage';
 import MovieNightDetails from './components/MovieNightDetails';
-
+import '@mantine/core/styles.css';
+import { MantineProvider } from '@mantine/core';
 
 function App() {
   return (
+    <MantineProvider>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -19,7 +21,7 @@ function App() {
           <Route path="/movie-nights/:id" element={<MovieNightDetails />} />
         </Routes>
       </Router>
-
+    </MantineProvider>
   );
 }
 

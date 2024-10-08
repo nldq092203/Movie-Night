@@ -155,7 +155,7 @@ function MovieSearch() {
       <div className="container mx-auto px-4 py-10">
         <h2 className="text-3xl font-bold mb-5">Search Results</h2>
 
-        {loading && <p className="text-center">Loading...</p>}
+        {loading && <p className="text-center"> Loading time can be maximum 2 minutes. Please wait ...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
 
         {results.length > 0 && (

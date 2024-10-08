@@ -7,5 +7,8 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [],
+  // plugins: [],
+  // corePlugins: {
+  //   preflight: false, // Disable Tailwind's base reset
+  // }
 }

@@ -19,10 +19,10 @@ class MovieFilterSet(filters.FilterSet):
     - genres: Filters movies that belong to the specified genres. Uses AND logic (conjoined=True).
     - title: Filters movies whose titles contain the given substring (case-insensitive).
     """
-    published_from = filters.DateFilter(
+    published_from = filters.NumberFilter(
         field_name="year", lookup_expr="gte", label="Published Date From"
     )
-    published_to = filters.DateFilter(
+    published_to = filters.NumberFilter(
         field_name="year", lookup_expr="lte", label="Published Date To"
     )
     runtime_minutes_to = filters.NumberFilter(

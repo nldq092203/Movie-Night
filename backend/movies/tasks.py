@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 def search_and_save(search):
     return omdb_integration.search_and_save(search)
 
+@shared_task
+def fill_movie_details(movie):
+    return omdb_integration.fill_movie_details(movie)
+
 
 
 @shared_task

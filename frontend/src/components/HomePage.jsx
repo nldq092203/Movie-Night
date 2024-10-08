@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import MovieCard from './MovieCard'; // Component to display individual movies
-import FilterDropdown from './FilterDropDown'; // Filter Dropdown Component
+import FilterDrawer from './FilterDrawer'; // Filter Dropdown Component
 import UserDropdown from './UserDropDown'; // User Dropdown Component
 import SearchBar from './SearchBar';
 import NotificationDropdown from './NotificationDropDown'; // Notification Dropdown Component
@@ -22,7 +22,12 @@ function HomePage() {
     genres: [],
     country: '',
     year: '',
-    runtime: '',
+    runtime_minutes: '',
+    imdb_rating_from: '',
+    runtime_minutes_from: '',
+    runtime_minutes_to: '',
+    published_from: '',
+    published_to: '',
   });
   const [ordering, setOrdering] = useState('');
 
@@ -39,7 +44,12 @@ function HomePage() {
           country: filters.country ? filters.country : undefined,
           year: filters.year ? filters.year : undefined,
           runtime_minutes: filters.runtime ? filters.runtime : undefined,
+          imdb_rating_from: filters.imdb_rating_from ? filters.imdb_rating_from : undefined,
+          runtime_minutes_from: filters.runtime_minutes_from ? filters.runtime_minutes_from: undefined,
+          runtime_minutes_to: filters.runtime_minutes_to ? filters.runtime_minutes_to: undefined,
           ordering: ordering ? ordering : undefined,
+          published_from: filters.published_from ? filters.published_from: undefined,
+          published_to: filters.published_to ? filters.published_to: undefined
         },
       });
       
@@ -54,7 +64,8 @@ function HomePage() {
         setHasMore(false);
       }
     } catch (err) {
-      setError('Failed to fetch movies.');
+      console.error(err)
+      setError('No results.');
     } finally {
       setLoading(false);
     }
@@ -112,7 +123,7 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white relative">
       {/* Filter Dropdown always at top-left */}
-      <FilterDropdown
+      <FilterDrawer
         filters={filters}
         setFilters={setFilters}
         ordering={ordering}
@@ -157,6 +168,7 @@ function HomePage() {
       {/* Notification Dropdown at right-bottom corner */}
       <NotificationDropdown />
     </div>
+    
   );
 }
 
