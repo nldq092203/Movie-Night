@@ -37,7 +37,7 @@ function CreateMovieNightBtn({ movieId }) {
       const accessToken = localStorage.getItem('access_token');
       const notificationInSeconds = convertDurationToSeconds(notificationTime);
       const response = await axios.post(
-        'http://localhost:8000/api/v1/my-movie-nights/',
+        'http://0.0.0.0:8000/api/v1/my-movie-nights/',
         {
           movie: movieId,
           start_time: startTime,
@@ -68,7 +68,7 @@ function CreateMovieNightBtn({ movieId }) {
       const accessToken = localStorage.getItem('access_token');
       const now = new Date().toISOString();
       const response = await axios.get(
-        'http://localhost:8000/api/v1/my-movie-nights/',
+        'http://0.0.0.0:8000/api/v1/my-movie-nights/',
         {
           params: { 
             ordering: 'movieId',

@@ -68,7 +68,7 @@ function Register() {
 
       // Send the registration request to the server
       const response = await axios.post(
-        'http://localhost:8000/auth/users/',
+        'http://0.0.0.0:8000/auth/users/',
         formData,
         {
           headers: {

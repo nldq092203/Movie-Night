@@ -13,7 +13,7 @@ function Filters({ filters, setFilters, ordering, setOrdering }) {
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/v1/genres/');
+        const response = await axios.get('http://0.0.0.0:8000/api/v1/genres/');
         setGenreOptions(response.data.results);
       } catch (err) {
         console.error('Failed to fetch genres.');

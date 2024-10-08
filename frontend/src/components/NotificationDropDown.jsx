@@ -27,7 +27,7 @@ function NotificationDropdown() {
         filterParams += `&notification_type=${filterType}`;
       }
 
-      const response = await fetch(`http://localhost:8000/api/v1/notifications/?ordering=-timestamp${filterParams}`, {
+      const response = await fetch(`http://0.0.0.0:8000/api/v1/notifications/?ordering=-timestamp${filterParams}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
@@ -51,7 +51,7 @@ function NotificationDropdown() {
   const markAllAsSeen = async () => {
     const accessToken = localStorage.getItem('access_token');
     try {
-      const response = await fetch('http://localhost:8000/api/v1/notifications/mark-all-seen/', {
+      const response = await fetch('http://0.0.0.0:8000/api/v1/notifications/mark-all-seen/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ function NotificationDropdown() {
   const markAsRead = async (notificationId) => {
     const accessToken = localStorage.getItem('access_token');
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/notifications/${notificationId}/mark-read/`, {
+      const response = await fetch(`http://0.0.0.0:8000/api/v1/notifications/${notificationId}/mark-read/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
