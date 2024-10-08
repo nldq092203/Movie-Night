@@ -41,7 +41,7 @@ function Login() {
       setError(null); // Clear previous errors
 
       // Send the Google ID token to the backend
-      const res = await axios.post('http://0.0.0.0:8000/auth/google/', {
+      const res = await axios.post('http://localhost:8000/auth/google/', {
         id_token: response.credential,
       });
 

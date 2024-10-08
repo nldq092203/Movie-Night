@@ -17,7 +17,7 @@ function MovieDetails() {
           return;
         }
 
-        const response = await axios.get(`http://0.0.0.0:8000/api/v1/movies/${id}/`, {
+        const response = await axios.get(`http://localhost:8000/api/v1/movies/${id}/`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

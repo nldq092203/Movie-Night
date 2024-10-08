@@ -34,7 +34,7 @@ function MovieNightDetails() {
   const fetchUserEmail = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await axios.get('http://0.0.0.0:8000/auth/users/', {
+      const response = await axios.get('http://localhost:8000/auth/users/', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserEmail(response.data.results[0].email);
@@ -56,7 +56,7 @@ function MovieNightDetails() {
     const fetchMovieNightDetails = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://0.0.0.0:8000/api/v1/movie-nights/${id}/`, {
+        const response = await axios.get(`http://localhost:8000/api/v1/movie-nights/${id}/`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -78,7 +78,7 @@ function MovieNightDetails() {
     if (movieNight?.movie) {
       const fetchMovieDetails = async () => {
         try {
-          const response = await axios.get(`http://0.0.0.0:8000/api/v1/movies/${movieNight.movie}/`, {
+          const response = await axios.get(`http://localhost:8000/api/v1/movies/${movieNight.movie}/`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -99,7 +99,7 @@ function MovieNightDetails() {
     setUpdateTimeError(null);
     try {
       const response = await axios.patch(
-        `http://0.0.0.0:8000/api/v1/movie-nights/${id}/`,
+        `http://localhost:8000/api/v1/movie-nights/${id}/`,
         { start_time: newStartTime },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -116,7 +116,7 @@ function MovieNightDetails() {
   const handleDelete = async () => {
     setDeleteError(null);
     try {
-      await axios.delete(`http://0.0.0.0:8000/api/v1/movie-nights/${id}/`, {
+      await axios.delete(`http://localhost:8000/api/v1/movie-nights/${id}/`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       navigate(`/movies/${movieNight.movie}/`); // Redirect to the movie detail page
@@ -131,7 +131,7 @@ function MovieNightDetails() {
     setInviteError(null);
     try {
       await axios.post(
-        `http://0.0.0.0:8000/api/v1/movie-nights/${id}/invite/`,
+        `http://localhost:8000/api/v1/movie-nights/${id}/invite/`,
         { invitee: inviteeEmail, movie_night: id },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -152,7 +152,7 @@ const handleInvitationResponse = async (isAttending) => {
   try {
     // Send PATCH request to update invitation status
     await axios.patch(
-      `http://0.0.0.0:8000/api/v1/movienight-invitations/${movienight_invitation_id}/`,
+      `http://localhost:8000/api/v1/movienight-invitations/${movienight_invitation_id}/`,
       {
         is_attending: isAttending, // Accept or decline
         attendance_confirmed: true // Confirm attendance

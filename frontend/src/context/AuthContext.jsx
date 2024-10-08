@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   // Login function - stores tokens and user data
   const loginUser = async (credentials) => {
     try {
-      const response = await axios.post('http://0.0.0.0:8000/auth/token/', credentials);
+      const response = await axios.post('http://localhost:8000/auth/token/', credentials);
       const { access, refresh } = response.data;
       setAccessToken(access);
       setRefreshToken(refresh);
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   // Function to refresh access token
   const refreshAccessToken = async () => {
     try {
-      const response = await axios.post('http://0.0.0.0:8000/auth/token/refresh/', {
+      const response = await axios.post('http://localhost:8000/auth/token/refresh/', {
         refresh: refreshToken,
       });
       const newAccessToken = response.data.access;

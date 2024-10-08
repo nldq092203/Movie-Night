@@ -44,7 +44,7 @@ function MovieSearch() {
 
     try {
       // Perform the search request
-      const response = await axios.post('http://0.0.0.0:8000/api/v1/movies/search/', {
+      const response = await axios.post('http://localhost:8000/api/v1/movies/search/', {
         term: term,
       });
 
