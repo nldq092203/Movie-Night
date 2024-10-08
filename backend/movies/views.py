@@ -126,8 +126,8 @@ class MovieSearchView(APIView):
             )
 
         try:
-            # Check if the task completes in 30 seconds, else redirect to "wait"
-            res.get(timeout=30)
+            # Check if the task completes in 120 seconds, else redirect to "wait"
+            res.get(timeout=120)
         except TimeoutError:
             # Redirect to a wait page if the task is still running
             return redirect(
