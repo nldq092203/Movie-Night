@@ -13,7 +13,7 @@ function HomePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Pagination states
-  const [nextPageUrl, setNextPageUrl] = useState('http://0.0.0.0:8000/api/v1/movies/'); // Start at the first page
+  const [nextPageUrl, setNextPageUrl] = useState('http://localhost:8000/api/v1/movies/'); // Start at the first page
   const [hasMore, setHasMore] = useState(true); // Whether there are more pages
   const [showHeader, setShowHeader] = useState(true); // For the header visibility
 
@@ -75,9 +75,9 @@ function HomePage() {
   useEffect(() => {
     // Reset movie list and page when filters or ordering change
     setMovies([]);
-    setNextPageUrl('http://0.0.0.0:8000/api/v1/movies/');
+    setNextPageUrl('http://localhost:8000/api/v1/movies/');
     setHasMore(true);
-    fetchMovies('http://0.0.0.0:8000/api/v1/movies/');
+    fetchMovies('http://localhost:8000/api/v1/movies/');
   }, [filters, ordering]);
 
   // Function to get the greeting based on the current time
