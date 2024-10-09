@@ -2,14 +2,14 @@ services:
   # Django Backend
   web:
     build:
-      context: ./backend         # Set to the backend directory
-      dockerfile: Dockerfile      # Use the Dockerfile in the backend directory
+      context: .  
+      dockerfile: Dockerfile  
     command: >
       sh -c "
       python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./backend:/app           # Mount the backend code for development
+      - .:/app        
     env_file:
       - ./.env
     ports:
@@ -39,13 +39,13 @@ services:
   # Celery Worker
   celery:
     build:
-      context: ./backend         # Use the backend Dockerfile
+      context: .      
       dockerfile: Dockerfile
     command: >
       sh -c "
       celery -A movienight worker --loglevel=INFO"
     volumes:
-      - ./backend:/app           # Mount the backend code for development
+      - .:/app     
     env_file:
       - ./.env
     depends_on:
@@ -55,34 +55,18 @@ services:
   # Celery Beat
   celery-beat:
     build:
-      context: ./backend         # Use the backend Dockerfile
+      context: .      
       dockerfile: Dockerfile
     command: >
       sh -c "
       celery -A movienight beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     volumes:
-      - ./backend:/app           # Mount the backend code for development
+      - .:/app       
     env_file:
       - ./.env
     depends_on:
       - web
       - redis
-
-  # Frontend (React with Vite)
-  frontend:
-    build:
-      context: ./frontend        # Set to the frontend directory
-      dockerfile: Dockerfile     # Use the Dockerfile in the frontend directory
-    ports:
-      - "5173:5173"              # Expose the Vite development server port
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000  # Set backend API URL for development
-      - CHOKIDAR_USEPOLLING=true  # Enable polling to detect file changes in Docker
-    volumes:
-      - ./frontend:/app          # Mount frontend code for hot reloading
-    command: npm run dev         # Run Vite in development mode
-    depends_on:
-      - web                      # Ensure backend is running for API requests
 
 volumes:
   postgres_data: {}
