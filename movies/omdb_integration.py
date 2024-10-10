@@ -73,13 +73,13 @@ def search_and_save(search):
             defaults={
                 "title": omdb_movie.title,  # Set attributes in defaults if a new Movie is created
                 "year": omdb_movie.year,
-                "url_poster": omdb_movie.url_poster                   
+                "url_poster": omdb_movie.url_poster,           
             },
         )
 
         if created:
             logger.info("Movie created: '%s'", movie.title)
-            fill_movie_details(movie)
+            # fill_movie_details(movie)
 
     search_term.save()
 

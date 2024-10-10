@@ -505,6 +505,17 @@ class MyNotificationView(ListAPIView):
             queryset = queryset.filter(notification_type=notification_type)
         
         return queryset
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        
+        # Calculate unseen count
+        unseen_count = Notification.objects.filter(recipient=request.user, is_seen=False).count()
+        
+        return Response({
+            'results': serializer.data,
+            'unseenCount': unseen_count
+        })
 
 class MarkReadNotificationView(UpdateAPIView):
     """

@@ -23,12 +23,6 @@ def search_and_save(search):
     return omdb_integration.search_and_save(search)
 
 @shared_task
-def fill_movie_details(movie):
-    return omdb_integration.fill_movie_details(movie)
-
-
-
-@shared_task
 def send_invitation(mni_pk):
     logger.info(f"Attempting to fetch MovieNightInvitation with pk={mni_pk}")
     try:

@@ -57,8 +57,11 @@ class MovieSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Movie
-        fields = ["id", "imdb_id", "title", "year", "url_poster"]
+        fields = ["id", "imdb_id", "title", "year", "url_poster", "imdb_rating"]
 
+    def validate_url_poster(self, value):
+        # Accept all values for url_poster
+        return value
 
 class GenreField(serializers.StringRelatedField):
     """
