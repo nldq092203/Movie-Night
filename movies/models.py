@@ -170,8 +170,8 @@ class MovieNightInvitation(models.Model):
     class Meta:
         unique_together = [("invitee", "movie_night")]  # Ensures that the same invitee can't receive multiple invitations for the same movie night
 
-    movie_night = models.ForeignKey(MovieNight, on_delete=models.CASCADE, related_name="invites")
-    invitee = models.ForeignKey(UserModel, on_delete=models.CASCADE)  # The user invited to the movie night
+    movie_night = models.ForeignKey(MovieNight, on_delete=models.CASCADE, related_name="invites", db_index=True)
+    invitee = models.ForeignKey(UserModel, on_delete=models.CASCADE, db_index=True)  # The user invited to the movie night
     attendance_confirmed = models.BooleanField(default=False)  # Whether the invitee has confirmed attendance
     is_attending = models.BooleanField(default=False)  # Whether the invitee is attending
     notifications = GenericRelation(Notification)  # Links notifications related to the invitation

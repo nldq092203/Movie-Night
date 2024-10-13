@@ -362,13 +362,111 @@ class InvitedMovieNightView(ListAPIView):
         user = self.request.user
 
         return MovieNight.objects.filter(invites__invitee=user)
-    
+
+@extend_schema(
+    description="Retrieve, update, or delete a movie night event. The response includes detailed movie night information and the current user's invitation status.",
+    responses={
+        200: OpenApiResponse(
+            description="Successful retrieval of movie night details with user's invitation status.",
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Successful Response',
+                    value={
+                        "id": 1,
+                        "movie": "Inception",
+                        "start_time": "2024-10-12T19:00:00Z",
+                        "creator": "creator@example.com",
+                        "start_notification_sent": False,
+                        "start_notification_before": "5",
+                        "invitation_status": {
+                            "is_invited": True,
+                            "attendance_confirmed": False,
+                            "is_attending": None
+                        }
+                    },
+                    response_only=True
+                )
+            ]
+        ),
+        403: OpenApiResponse(
+            description="Permission denied. The user does not have access to this movie night.",
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Forbidden',
+                    value={
+                        "detail": "You do not have permission to perform this action."
+                    },
+                    response_only=True
+                )
+            ]
+        ),
+        404: OpenApiResponse(
+            description="Movie night not found. The requested movie night does not exist.",
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Not Found',
+                    value={
+                        "detail": "Not found."
+                    },
+                    response_only=True
+                )
+            ]
+        ),
+        500: OpenApiResponse(
+            description="Internal Server Error. An error occurred while processing the request.",
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Server Error',
+                    value={
+                        "error": "An unexpected error occurred while processing your request."
+                    },
+                    response_only=True
+                )
+            ]
+        ),
+    }
+)
 class MovieNightDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = MovieNightDetailSerializer
     permission_classes = [IsAuthenticated, MovieNightDetailPermission]
     queryset = MovieNight.objects.all()
 
+    def retrieve(self, request, *args, **kwargs):
+        # Retrieve the movie night instance
+        movie_night = self.get_object()
 
+        # Initialize invitation status response
+        invitation_status = {
+            "is_invited": False,
+            "attendance_confirmed": False,
+            "is_attending": False
+        }
+
+        # Use filter().first() to efficiently check if an invitation exists
+        invitation = MovieNightInvitation.objects.filter(
+            movie_night=movie_night,
+            invitee=request.user
+        ).first()
+
+        if invitation:
+            invitation_status = {
+                "is_invited": True,
+                "attendance_confirmed": invitation.attendance_confirmed,
+                "is_attending": invitation.is_attending
+            }   
+
+        # Serialize the movie night details
+        serializer = self.get_serializer(movie_night)
+        movie_night_data = serializer.data
+
+        # Add invitation status to the response data
+        movie_night_data.update({"invitation_status": invitation_status})
+
+        return Response(movie_night_data)
 ########## MovieNightInvitation ############
 class MyMovieNightInvitationView(ListAPIView):
     """
