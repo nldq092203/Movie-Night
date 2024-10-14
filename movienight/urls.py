@@ -27,6 +27,7 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="jwt_refresh"),
     path("auth/", include("movienight_auth.urls")),
     path("api/v1/", include("movies.urls")),
+    path("api/v1/", include("notifications.urls")),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),

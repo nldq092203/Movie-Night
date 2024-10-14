@@ -16,7 +16,7 @@ The tests cover both authenticated and unauthenticated access, ensuring that the
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from movies.models import Notification
+from notifications.models import Notification
 from tests.factories import UserFactory, NotificationFactory
 from django.utils import timezone
 import logging

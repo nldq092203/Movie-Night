@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse, resolve
-from movies.views import MyNotificationView, MarkReadNotificationView
+from notifications.views import MyNotificationView, MarkReadNotificationView
 
 @pytest.mark.django_db
 class TestNotificationURLs:

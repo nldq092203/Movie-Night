@@ -4,9 +4,9 @@ from movies.models import (
     SearchTerm,
     Movie,
     MovieNight,
-    MovieNightInvitation,
-    Notification
+    MovieNightInvitation,    
 )
+from notifications.models import Notification
 class MovieAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'year')
 

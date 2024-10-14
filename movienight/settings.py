@@ -62,6 +62,8 @@ class Dev(Configuration):
 
         # Other custom apps
         'movies',
+        'notifications',
+        'chat'
     ] 
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
@@ -92,7 +94,7 @@ class Dev(Configuration):
         },
     ]
 
-    WSGI_APPLICATION = 'movienight.wsgi.application'
+    ASGI_APPLICATION = 'movienight.asgi.application'
 
 
     # Database
@@ -248,6 +250,16 @@ class Dev(Configuration):
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_RESULT_SERIALIZER = 'json'
+
+    # Channels Layer
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("redis", 6379)],
+            },
+        },
+    }
 
 
 

@@ -13,7 +13,7 @@ Each task utilizes background processing to offload these operations and improve
 
 from celery import shared_task
 from movies import omdb_integration
-from movies import notifications
+from notifications import notifications
 from movies.models import MovieNightInvitation, MovieNight
 import logging 
 logger = logging.getLogger(__name__)
