@@ -16,7 +16,7 @@ The tests cover both authenticated and unauthenticated access, ensuring that the
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from movies.models import Notification
+from notifications.models import Notification
 from tests.factories import UserFactory, NotificationFactory
 from django.utils import timezone
 import logging
@@ -85,6 +85,29 @@ class TestMyNotificationView:
 
         # Assert that the response is 401 Unauthorized
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_list_notifications_ordered_by_timestamp(self, authenticated_client, user):
+        """
+        Test that notifications are ordered by timestamp in descending order by default.
+        """
+        # Create notifications with specific timestamps
+        notification1 = NotificationFactory(recipient=user)
+        notification2 = NotificationFactory(recipient=user)
+        notification3 = NotificationFactory(recipient=user)
+
+        url = reverse('my_notifications') + '?ordering=-timestamp'
+        response = authenticated_client.get(url)
+
+        # Check if the request was successful
+        assert response.status_code == status.HTTP_200_OK
+
+        # Ensure notifications are ordered by timestamp in descending order
+        results = response.data['results']
+        logger.warning(response.data)
+        assert len(results) == 3  # All notifications should be returned
+        assert results[0]['id'] == notification3.id  # Most recent notification
+        assert results[1]['id'] == notification2.id  # Second most recent
+        assert results[2]['id'] == notification1.id  # Oldest notification
 
 
 @pytest.mark.django_db

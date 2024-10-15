@@ -23,7 +23,7 @@ Test cases for the notifications in the Movie Night application including:
 """
 
 import pytest
-from movies.notifications import NotificationSerializer
+from notifications.notifications import NotificationSerializer
 from unittest import mock
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
@@ -34,7 +34,7 @@ from tests.factories import MovieNightFactory, MovieNightInvitationFactory, User
 @pytest.mark.django_db
 class TestSendInvitation:
 
-    @mock.patch('movies.notifications.NotificationSerializer') 
+    @mock.patch('notifications.notifications.NotificationSerializer') 
     def test_send_invitation(self, mock_serializer):
         """
         Test that an invitation notification is sent when a MovieNightInvitation is created.
@@ -46,7 +46,7 @@ class TestSendInvitation:
         mock_serializer_instance = mock_serializer.return_value
         mock_serializer_instance.is_valid.return_value = True
 
-        from movies.notifications import send_invitation  
+        from notifications.notifications import send_invitation  
         # Call the function
         send_invitation(movie_night_invitation)
 
@@ -68,7 +68,7 @@ class TestSendInvitation:
 
 @pytest.mark.django_db
 class TestSendAttendanceChange:
-    @mock.patch('movies.notifications.NotificationSerializer')
+    @mock.patch('notifications.notifications.NotificationSerializer')
     def test_send_attendance_change(self, mock_serializer):
         """
         Test that an attendance change notification is sent when an invitee accepts or refuses.
@@ -80,7 +80,7 @@ class TestSendAttendanceChange:
         mock_serializer_instance = mock_serializer.return_value
         mock_serializer_instance.is_valid.return_value = True
 
-        from movies.notifications import send_attendance_change
+        from notifications.notifications import send_attendance_change
         # Call the function for accepting
         send_attendance_change(movie_night_invitation, True)
 
@@ -104,7 +104,7 @@ class TestSendAttendanceChange:
 @pytest.mark.django_db
 class TestSendMovieNightUpdate:
     
-    @mock.patch('movies.notifications.NotificationSerializer')
+    @mock.patch('notifications.notifications.NotificationSerializer')
     def test_send_movie_night_update(self, mock_serializer):
         """
         Test that the movie night update notification is sent to accepted invitees.
@@ -118,7 +118,7 @@ class TestSendMovieNightUpdate:
         mock_serializer_instance = mock_serializer.return_value
         mock_serializer_instance.is_valid.return_value = True
 
-        from movies.notifications import send_movie_night_update
+        from notifications.notifications import send_movie_night_update
         # Call the function
         send_movie_night_update(movie_night, "2024-10-06 18:00")
 
@@ -140,7 +140,7 @@ class TestSendMovieNightUpdate:
 @pytest.mark.django_db
 class TestSendStartingNotification:
     
-    @mock.patch('movies.notifications.NotificationSerializer')
+    @mock.patch('notifications.notifications.NotificationSerializer')
     def test_send_starting_notification(self, mock_serializer):
         """
         Test that starting notifications are sent to the creator and accepted invitees.
@@ -153,7 +153,7 @@ class TestSendStartingNotification:
         mock_serializer_instance = mock_serializer.return_value
         mock_serializer_instance.is_valid.return_value = True
 
-        from movies.notifications import send_starting_notification
+        from notifications.notifications import send_starting_notification
         # Call the function
         send_starting_notification(movie_night)
 
@@ -167,7 +167,7 @@ class TestSendStartingNotification:
         # Ensure the movie night is marked as notification sent
         assert movie_night.start_notification_sent
     
-    @mock.patch('movies.notifications.send_starting_notification')
+    @mock.patch('notifications.notifications.send_starting_notification')
     def test_notify_of_starting_soon(self, mock_notification):
         """
         Test that notifications for starting soon movie nights are sent.
@@ -181,7 +181,7 @@ class TestSendStartingNotification:
         movie_night.start_notification_before = timezone.timedelta(minutes=30)
         movie_night.save()
 
-        from movies.notifications import notify_of_starting_soon
+        from notifications.notifications import notify_of_starting_soon
         notify_of_starting_soon()
 
         # Assert that send_starting_notification was called with the movie_night
@@ -191,7 +191,7 @@ class TestSendStartingNotification:
 @pytest.mark.django_db
 class TestSendMovieNightDeleteSignal:
     
-    @mock.patch('movies.notifications.NotificationSerializer')
+    @mock.patch('notifications.notifications.NotificationSerializer')
     def test_send_movie_night_delete(self, mock_serializer):
         """
         Test that movie night delete notifications are sent to accepted invitees.
@@ -204,7 +204,7 @@ class TestSendMovieNightDeleteSignal:
         mock_serializer_instance = mock_serializer.return_value
         mock_serializer_instance.is_valid.return_value = True
 
-        from movies.notifications import send_movie_night_delete
+        from notifications.notifications import send_movie_night_delete
         # Call the function
         send_movie_night_delete(movie_night)
         formatted_start_time = movie_night.start_time.strftime('%Y-%m-%d %H:%M:%S')

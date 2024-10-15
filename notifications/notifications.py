@@ -5,7 +5,7 @@ movie night updates, reminders, and cancellations. It uses Django's content type
 to send asynchronous notifications to users.
 """
 
-from movies.serializers import NotificationSerializer
+from notifications.serializers import NotificationSerializer
 from django.contrib.contenttypes.models import ContentType
 from movies.models import MovieNightInvitation, MovieNight
 from django.contrib.auth import get_user_model

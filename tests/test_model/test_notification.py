@@ -23,7 +23,8 @@ Test cases:
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
-from movies.models import Notification, MovieNight, MovieNightInvitation
+from movies.models import MovieNight, MovieNightInvitation
+from notifications.models import Notification
 from tests.factories import UserFactory, MovieNightFactory, MovieNightInvitationFactory
 from django.core.exceptions import ValidationError
 

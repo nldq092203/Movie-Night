@@ -4,7 +4,8 @@ Defines factories for generating test data corresponding to models.
 import factory
 from factory.django import DjangoModelFactory
 from django.contrib.auth import get_user_model
-from movies.models import UserProfile, Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation, Notification
+from movies.models import UserProfile, Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation
+from notifications.models import Notification
 from django.utils import timezone 
 UserModel = get_user_model()
 
@@ -100,6 +101,7 @@ class NotificationFactory(DjangoModelFactory):
     sender = factory.SubFactory(UserFactory)
     notification_type = "INV"
     content_object = factory.SubFactory(MovieNightFactory)
+    timestamp = timezone.now()
 
     @factory.lazy_attribute
     def content_type(self):

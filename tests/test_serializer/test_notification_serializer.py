@@ -23,8 +23,8 @@ Test cases:
 import pytest
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from movies.serializers import NotificationSerializer
-from movies.models import Notification, MovieNight, MovieNightInvitation
+from notifications.serializers import NotificationSerializer
+from movies.models import MovieNight
 from tests.factories import UserFactory, MovieNightFactory, MovieNightInvitationFactory, NotificationFactory
 
 

@@ -62,6 +62,7 @@ class Dev(Configuration):
 
         # Other custom apps
         'movies',
+        "notifications"
     ] 
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
