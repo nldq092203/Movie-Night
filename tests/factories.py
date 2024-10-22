@@ -4,9 +4,11 @@ Defines factories for generating test data corresponding to models.
 import factory
 from factory.django import DjangoModelFactory
 from django.contrib.auth import get_user_model
-from movies.models import UserProfile, Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation
+from movies.models import Genre, SearchTerm, Movie, MovieNight, MovieNightInvitation
+from movienight_profile.models import UserProfile
 from notifications.models import Notification
 from django.utils import timezone 
+from factory import Faker
 UserModel = get_user_model()
 
 class UserFactory(DjangoModelFactory):
@@ -17,14 +19,24 @@ class UserFactory(DjangoModelFactory):
     password = factory.PostGenerationMethodCall('set_password', 'defaultpassword')
 
 
-class UserProfileFactory(DjangoModelFactory):
+
+class UserProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = UserProfile
 
     user = factory.SubFactory(UserFactory)
+    name = factory.Faker('name')
     bio = factory.Faker('text')
+    gender = 'Male'
+    custom_gender = None
 
-
+    @factory.lazy_attribute
+    def custom_gender(self):
+        if self.gender == 'Custom':
+            # Directly use Faker without evaluate
+            return factory.Faker('word').generate()
+        return None  # Set None for non-custom genders
+    
 class GenreFactory(DjangoModelFactory):
     class Meta:
         model = Genre

@@ -49,7 +49,20 @@ class IsInvitee(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Only allow the invitee of the invitation to access it
         return obj.invitee == request.user
-    
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Custom permission to only allow owners of a profile to edit it.
+    Assumes the profile model has a 'user' field that links it to a User model.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read-only permissions are allowed for any authenticated request
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        
+        # Write permissions are only allowed to the owner of the profile
+        return obj.user == request.user
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com
 """

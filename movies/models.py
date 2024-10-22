@@ -1,33 +1,16 @@
 """
-This module defines models related to a movie night application, which includes user profiles,
-genres, search terms, movies, movie nights, and movie night invitations.
+This module defines models related to a movie night application, which includes genres, search terms, movies, movie nights, and movie night invitations.
 Each model includes methods to handle business logic, including saving data, and representing objects with human-readable formats.
 
 """
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation
 from datetime import timedelta
 from notifications.models import Notification
 
 UserModel = get_user_model()
-
-class UserProfile(models.Model):
-    """
-    UserProfile model stores additional information for the user such as bio.
-    Each user has a one-to-one relationship with their profile.
-    """
-    user = models.OneToOneField(UserModel, on_delete=models.CASCADE, related_name="profile")
-    name = models.CharField(max_length=64, blank=True, null=True)
-    bio = models.TextField()
-
-    def __str__(self):
-        """
-        Returns a string representation of the user profile.
-        """
-        return f"{self.__class__.__name__} object for {self.user}"
 
 
 class Genre(models.Model):

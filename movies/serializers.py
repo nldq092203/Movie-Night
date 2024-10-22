@@ -1,12 +1,12 @@
 """
 This module contains Django REST Framework serializers for handling serialization and validation of 
-various models in a movie night application. These models include UserProfile, Genre, Movie, 
+various models in a movie night application. These models include User, Genre, Movie, 
 MovieNight, MovieNightInvitation, and SearchTerm. Each serializer handles data 
 validation, serialization to and from JSON, and custom logic for specific fields.
 """
 
 from rest_framework import serializers
-from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation, UserProfile
+from movies.models import Genre, Movie, SearchTerm, MovieNight, MovieNightInvitation
 from movienight_auth.models import User
 from django.utils import timezone
 from datetime import timedelta
@@ -15,14 +15,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the UserProfile model.
-    Handles all fields of the UserProfile model.
-    """
-    class Meta:
-        model = UserProfile
-        fields = "__all__"
 
 
 class GenreSerializer(serializers.ModelSerializer):

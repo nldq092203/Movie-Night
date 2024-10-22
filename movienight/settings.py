@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
 from configurations import Configuration, values
 
 from datetime import timedelta
@@ -34,9 +35,11 @@ class Dev(Configuration):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(True)
 
-    ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1"])
+    ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1", "bb9e-213-248-108-235.ngrok-free.app"])
 
     AUTH_USER_MODEL = "movienight_auth.User"
+
+    USE_SQLITE_FOR_TESTS = os.getenv('USE_SQLITE_FOR_TESTS') == 'True'
 
 
     # Application definition
@@ -62,7 +65,9 @@ class Dev(Configuration):
 
         # Other custom apps
         'movies',
-        "notifications"
+        "notifications",
+        "chat",
+        "movienight_profile"
     ] 
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
@@ -111,6 +116,12 @@ class Dev(Configuration):
         }
     }
 
+    # Ensure tests use SQLite
+    if 'test' in sys.argv or USE_SQLITE_FOR_TESTS:
+        DATABASES['default'] = {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
+        }
     # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
 
     # Password validation
@@ -225,7 +236,7 @@ class Dev(Configuration):
             'BasicAuth': {
                 'type': 'http',
                 'scheme': 'basic',
-                'description': 'Basic authentication with username and password.'
+                'description': 'Basic authentication with email and password.'
             },
         },
         'SECURITY_DEFINITIONS': {
@@ -249,6 +260,10 @@ class Dev(Configuration):
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_RESULT_SERIALIZER = 'json'
+
+
+    # ABLY
+    ABLY_API_KEY = os.getenv('ABLY_API_KEY')
 
 
 

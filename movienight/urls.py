@@ -28,6 +28,8 @@ urlpatterns = [
     path("auth/", include("movienight_auth.urls")),
     path("api/v1/", include("movies.urls")),
     path("api/v1/", include("notifications.urls")),
+    path("api/v1/", include("chat.urls")),
+    path("api/v1/", include("movienight_profile.urls")),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),

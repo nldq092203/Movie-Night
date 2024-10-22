@@ -116,7 +116,7 @@ class TestSearchAndSave:
 
     def test_search_recently_performed(self, mocker):
         """
-        Test that if a search term has been searched in the past 48 hours, no new search is performed.
+        Test that if a search term has been searched in the past 30 days, no new search is performed.
         """
 
         self.mock_search_get_or_create.return_value = (mocker.Mock(term=self.search_term, last_search=now()), False)
@@ -125,7 +125,7 @@ class TestSearchAndSave:
         # Asserts
         # Logger warning displayed
         self.mock_logger.warning.assert_any_call(
-            "Search for '%s' was performed in the past 48 hours so not searching from omdb_api again.",
+            "Search for '%s' was performed in the past 30 days so not searching from omdb_api again.",
             "test term",
         )
         # No omdb_client was called

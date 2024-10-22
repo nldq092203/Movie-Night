@@ -12,23 +12,16 @@ services:
       - .:/app        
     env_file:
       - ./.env
+    environment:
+      - DATABASE_HOST=${DB_HOST}
+      - DATABASE_PORT=${DB_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${POSTGRES_DB}
     ports:
       - "8000:8000"
     depends_on:
-      - db
       - redis
-
-  # PostgreSQL Database
-  db:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    ports:
-      - "5432:5432"
 
   # Redis
   redis:
@@ -48,6 +41,12 @@ services:
       - .:/app     
     env_file:
       - ./.env
+    environment:
+      - DATABASE_HOST=${DB_HOST}
+      - DATABASE_PORT=${DB_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${POSTGRES_DB}
     depends_on:
       - web
       - redis
@@ -64,9 +63,12 @@ services:
       - .:/app       
     env_file:
       - ./.env
+    environment:
+      - DATABASE_HOST=${DB_HOST}
+      - DATABASE_PORT=${DB_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${POSTGRES_DB}
     depends_on:
       - web
       - redis
-
-volumes:
-  postgres_data: {}

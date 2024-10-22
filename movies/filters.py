@@ -70,6 +70,8 @@ class ParticipatingMovieNightFilterSet(filters.FilterSet):
     - creator
     - invitee (based on invitations)
     """
+    creator_email = filters.CharFilter(field_name="creator__email", lookup_expr="icontains")
+
     start_from = filters.DateTimeFilter(
         field_name="start_time", lookup_expr="gte", label="Start Time From"
     )
@@ -80,7 +82,7 @@ class ParticipatingMovieNightFilterSet(filters.FilterSet):
     class Meta:
         model = MovieNight
         fields = [
-            'creator', 'invites__invitee', 'start_time'
+            'creator_email', 'invites__invitee', 'start_time'
         ]
 
 class MovieNightInvitationFilterSet(filters.FilterSet):

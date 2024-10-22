@@ -48,7 +48,7 @@ def fill_movie_details(movie):
 
 def search_and_save(search):
     """
-    Perform a search for search_term against the API, but only if it hasn't been searched in the past 48 hours. Save
+    Perform a search for search_term against the API, but only if it hasn't been searched in the past 30 days. Save
     each result to the local DB as a partial record.
     """
     # Replace multiple spaces with single spaces, and lowercase the search
@@ -56,10 +56,10 @@ def search_and_save(search):
 
     search_term, created = SearchTerm.objects.get_or_create(term=normalized_search_term)
 
-    if not created and (search_term.last_search > now() - timedelta(days=2)):
-        # Don't search as it has been searched in 2 days
+    if not created and (search_term.last_search > now() - timedelta(days=30)):
+        # Don't search as it has been searched in 30 days
         logger.warning(
-            "Search for '%s' was performed in the past 48 hours so not searching from omdb_api again.",
+            "Search for '%s' was performed in the past 30 days so not searching from omdb_api again.",
             normalized_search_term,
         )
         return

@@ -14,9 +14,7 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
     CreateAPIView,
-    UpdateAPIView
     )                     
-from rest_framework.decorators import api_view, permission_classes
 from movies.serializers import (
     MovieSerializer, 
     MovieDetailSerializer, 
@@ -24,10 +22,9 @@ from movies.serializers import (
     MovieNightInvitationSerializer,
     MovieNightDetailSerializer,
     GenreSerializer, 
-    UserProfileSerializer,
     MovieSearchSerializer,
     )
-from movies.models import Movie, MovieNight, MovieNightInvitation, Genre, Notification
+from movies.models import Movie, MovieNight, MovieNightInvitation, Genre
 from django.contrib.auth import get_user_model
 from movies.tasks import search_and_save
 from movies.omdb_integration import fill_movie_details
@@ -44,7 +41,6 @@ from movies.filters import (
 from movies.permissions import MovieNightDetailPermission, MovieNightInvitationPermission, IsInvitee
 from django.db.models import Q
 from rest_framework.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
 from celery.exceptions import TimeoutError
 from django.shortcuts import redirect
 import urllib.parse
@@ -53,7 +49,7 @@ from movienight.celery import app
 from rest_framework.views import APIView
 from celery.result import AsyncResult
 
-from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiExample, OpenApiParameter, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 import logging
 logger = logging.getLogger(__name__)
@@ -322,9 +318,9 @@ class MyMovieNightView(ListCreateAPIView):
 class ParticipatingMovieNightView(ListAPIView):
     """
     View for listing all MovieNight instances where the authenticated user
-    is either the creator or a confirmed attendance invitee.
+    is either the creator or a confirmed attendance invitee, with detailed info.
     """
-    serializer_class = MovieNightSerializer
+    serializer_class = MovieNightDetailSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = ParticipatingMovieNightFilterSet
     ordering_fields = ["start_time", "creator"]
@@ -338,10 +334,38 @@ class ParticipatingMovieNightView(ListAPIView):
 
         user = self.request.user
 
-        return MovieNight.objects.filter(
+        # Filter for the user being either the creator or a confirmed invitee
+        queryset = MovieNight.objects.filter(
             Q(creator=user) | 
             Q(invites__invitee=user, invites__attendance_confirmed=True, invites__is_attending=True)
-        ).distinct() # distinct to avoid double
+        ).distinct()  # Use distinct to avoid duplicates
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        
+        # Serialize all movie night instances using MovieNightDetailSerializer
+        movie_nights_data = MovieNightDetailSerializer(queryset, many=True).data
+
+        # Loop through each movie night and add invitation status and movie details
+        for movie_night_data in movie_nights_data:
+            movie_night_instance = MovieNight.objects.get(id=movie_night_data['id'])
+
+            # Fetch the movie details
+            movie = movie_night_instance.movie
+            movie_data = {
+                "title": movie.title if movie else None,
+                "runtime_minutes": movie.runtime_minutes if movie else None,
+            }
+
+            # Add invitation status and movie data to each movie night entry
+            movie_night_data.update({
+
+                "movie": movie_data
+            })
+
+        return Response(movie_nights_data, status=status.HTTP_200_OK)
     
 class InvitedMovieNightView(ListAPIView):
     """
@@ -466,7 +490,9 @@ class MovieNightDetailView(RetrieveUpdateDestroyAPIView):
         movie_night_data = serializer.data
 
         # Add invitation status to the response data
-        movie_night_data.update({"invitation_status": invitation_status})
+        movie_night_data.update({
+            "invitation_status": invitation_status,
+            })
 
         return Response(movie_night_data)
 ########## MovieNightInvitation ############
@@ -540,22 +566,7 @@ class GenreDetailView(RetrieveAPIView):
     permission_classes = [AllowAny]  
     queryset = Genre.objects.all()  
 
-######## Profile #########
-class ProfileView(RetrieveAPIView):
-    """
-    API view for retrieving a user's profile by email.
-    Only authenticated users can access this view.
-    """
-    serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        """
-        Retrieve the profile based on the email provided in the URL.
-        """
-        email = self.kwargs.get('email')
-        user = get_object_or_404(User, email=email)
-        return user.profile 
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com
 """
