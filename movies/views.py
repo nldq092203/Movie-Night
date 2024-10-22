@@ -386,80 +386,51 @@ class InvitedMovieNightView(ListAPIView):
 
         return MovieNight.objects.filter(invites__invitee=user)
 
-@extend_schema(
-    description="Retrieve, update, or delete a movie night event. The response includes detailed movie night information and the current user's invitation status.",
-    responses={
-        200: OpenApiResponse(
-            description="Successful retrieval of movie night details with user's invitation status.",
-            response=OpenApiTypes.OBJECT,
-            examples=[
-                OpenApiExample(
-                    'Successful Response',
-                    value={
-                        "id": 1,
-                        "movie": "Inception",
-                        "start_time": "2024-10-12T19:00:00Z",
-                        "creator": "creator@example.com",
-                        "start_notification_sent": False,
-                        "start_notification_before": "5",
-                        "invitation_status": {
-                            "invitation_id": "1",
-                            "is_invited": True,
-                            "attendance_confirmed": False,
-                            "is_attending": None
-                        }
-                    },
-                    response_only=True
-                )
-            ]
-        ),
-        403: OpenApiResponse(
-            description="Permission denied. The user does not have access to this movie night.",
-            response=OpenApiTypes.OBJECT,
-            examples=[
-                OpenApiExample(
-                    'Forbidden',
-                    value={
-                        "detail": "You do not have permission to perform this action."
-                    },
-                    response_only=True
-                )
-            ]
-        ),
-        404: OpenApiResponse(
-            description="Movie night not found. The requested movie night does not exist.",
-            response=OpenApiTypes.OBJECT,
-            examples=[
-                OpenApiExample(
-                    'Not Found',
-                    value={
-                        "detail": "Not found."
-                    },
-                    response_only=True
-                )
-            ]
-        ),
-        500: OpenApiResponse(
-            description="Internal Server Error. An error occurred while processing the request.",
-            response=OpenApiTypes.OBJECT,
-            examples=[
-                OpenApiExample(
-                    'Server Error',
-                    value={
-                        "error": "An unexpected error occurred while processing your request."
-                    },
-                    response_only=True
-                )
-            ]
-        ),
-    }
-)
+
 class MovieNightDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    API view for retrieving, updating, or deleting a specific movie night.
+
+    This view supports:
+    - **Retrieve**: Get the details of a movie night by its ID.
+    - **Update**: Modify the details of a movie night (only allowed for certain users).
+    - **Delete**: Remove a movie night (only allowed for certain users).
+    
+    Additionally, when retrieving a movie night, the API returns the current user's invitation status 
+    if the user was invited to the movie night.
+
+    Permission:
+    - The user must be authenticated.
+    - Only users with appropriate permissions can update or delete the movie night.
+
+    Invitation Status Fields:
+    - **invitation_id**: The ID of the invitation (if the user is invited).
+    - **is_invited**: Whether the user is invited to the movie night.
+    - **attendance_confirmed**: Whether the user has confirmed their attendance.
+    - **is_attending**: Whether the user is attending the movie night.
+
+    Raises:
+    - `PermissionDenied`: If the user does not have permission to perform the requested operation.
+    """
     serializer_class = MovieNightDetailSerializer
     permission_classes = [IsAuthenticated, MovieNightDetailPermission]
     queryset = MovieNight.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve the details of a movie night, along with the current user's invitation status.
+
+        The invitation status includes:
+        - `invitation_id`: The ID of the invitation (if the user is invited).
+        - `is_invited`: Whether the user is invited.
+        - `attendance_confirmed`: Whether the user has confirmed their attendance.
+        - `is_attending`: Whether the user is attending the movie night.
+
+        If no invitation exists for the current user, default values are returned for the invitation status.
+        
+        Returns:
+            Response: A JSON response containing the movie night details and the user's invitation status.
+        """
         # Retrieve the movie night instance
         movie_night = self.get_object()
 
@@ -492,7 +463,7 @@ class MovieNightDetailView(RetrieveUpdateDestroyAPIView):
         # Add invitation status to the response data
         movie_night_data.update({
             "invitation_status": invitation_status,
-            })
+        })
 
         return Response(movie_night_data)
 ########## MovieNightInvitation ############

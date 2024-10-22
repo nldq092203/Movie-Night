@@ -60,3 +60,8 @@ class ProfileView(RetrieveUpdateAPIView):
         email = self.kwargs.get('email')
         user = get_object_or_404(User, email=email)
         serializer.save(user=user)  # Save the profile
+
+
+"""
+NGUYEN Le Diem Quynh lnguye220903@gmail.com
+"""
