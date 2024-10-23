@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import json
 import sys
 from configurations import Configuration, values
-
+import base64
+from firebase_admin import credentials, initialize_app
 from datetime import timedelta
 
 from dotenv import load_dotenv
@@ -265,7 +267,21 @@ class Dev(Configuration):
     # ABLY
     ABLY_API_KEY = os.getenv('ABLY_API_KEY')
 
+    #Firebase
+    # Get the base64-encoded Firebase key from the environment
+    firebase_key_base64 = os.getenv('FIREBASE_ADMINSDK_KEY')
 
+    # Decode the key from base64
+    firebase_key_json = base64.b64decode(firebase_key_base64).decode('utf-8')
+
+    # Convert the JSON string back to a dictionary
+    firebase_cred_dict = json.loads(firebase_key_json)
+
+    # Initialize Firebase Admin SDK using the decoded credentials
+    cred = credentials.Certificate(firebase_cred_dict)
+    initialize_app(cred, {
+        'storageBucket': 'gs://movie-night-609e1.appspot.com'  
+    })
 
 
 class Prod(Dev):
