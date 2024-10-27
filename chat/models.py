@@ -109,7 +109,9 @@ class GroupMessage(models.Model):
     group = models.ForeignKey(ChatGroup, related_name='chat_messages', on_delete=models.CASCADE, db_index=True)
     author = models.ForeignKey(UserModel, on_delete=models.CASCADE, db_index=True)
     body = models.CharField(max_length=300, blank=True, null=True)
-    file = models.FileField(upload_to='files/', blank=True, null=True)
+    file_url = models.URLField(max_length=500, blank=True, null=True)
+    file_name = models.CharField(max_length=300, blank=True, null=True)
+    file_type = models.CharField(max_length=300, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -121,39 +123,18 @@ class GroupMessage(models.Model):
             )
         ]    
 
-    @property
-    def filename(self):
-        """
-        Returns the filename of the attached file, if any.
-        """
-        if self.file:
-            return os.path.basename(self.file.name)
-        else:
-            return None
     
     def __str__(self):
-        """
-        Returns a string representation of the message, showing the author and either the message content or the filename.
-        """
+        details = f"{self.author.email} - {self.created.strftime('%Y-%m-%d %H:%M')}"
         if self.body:
-            return f'{self.author.email} : {self.body}'
-        elif self.file:
-            return f'{self.author.email} : {self.filename}'
+            details += f": {self.body}"
+        if self.file_url:
+            details += f" [File: {self.file_name}]"
+        return details
     
     class Meta:
         ordering = ['-created']  # Orders messages by creation time (newest first)
         
-    @property    
-    def is_image(self):
-        """
-        Checks if the attached file is an image.
-        """
-        try:
-            image = Image.open(self.file) 
-            image.verify()
-            return True 
-        except:
-            return False
 
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com

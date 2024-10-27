@@ -37,7 +37,7 @@ class Dev(Configuration):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(True)
 
-    ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1", "bb9e-213-248-108-235.ngrok-free.app"])
+    ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1", "9994-2a02-8428-81a3-a701-d871-ed23-88ac-5677.ngrok-free.app"])
 
     AUTH_USER_MODEL = "movienight_auth.User"
 
@@ -280,7 +280,7 @@ class Dev(Configuration):
     # Initialize Firebase Admin SDK using the decoded credentials
     cred = credentials.Certificate(firebase_cred_dict)
     initialize_app(cred, {
-        'storageBucket': 'gs://movie-night-609e1.appspot.com'  
+        'storageBucket': 'movie-night-609e1.appspot.com'  
     })
 
 

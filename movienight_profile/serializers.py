@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from .models import UserProfile
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.EmailField()
     class Meta:
         model = UserProfile
-        fields = ['user', 'name', 'bio', 'gender', 'custom_gender']
-        read_only = ['user']
+        fields = ['user', 'name', 'bio', 'gender', 'custom_gender', 'avatar_url']
+        read_only = ['user', 'avatar_url']
 
     def validate(self, data):
         """

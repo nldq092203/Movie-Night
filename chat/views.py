@@ -70,6 +70,8 @@ import uuid
 import json
 from django.utils.crypto import get_random_string
 import logging
+from django.db.models import Case, When, Value, CharField, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 
 logger = logging.getLogger(__name__)
 
@@ -150,11 +152,17 @@ class ChatGroupView(ListCreateAPIView):
         This also fetches and includes details of the last message in each group, such as the message content, 
         the timestamp of the last message, and the sender's email. The results are ordered by the last message time.
         """
-        last_message = GroupMessage.objects.filter(group=OuterRef('pk')).order_by('-created')
+        last_message = GroupMessage.objects.filter(group=OuterRef('pk')).order_by('-created').annotate(
+            content=Case(
+                When(body__isnull=False, then='body'),    
+                default=Value('Attachment sent'),                      
+                output_field=CharField()
+            )
+        )
         
         return ChatGroup.objects.filter(membership__user=self.request.user)\
             .annotate(
-                last_message_content=Subquery(last_message.values('body')[:1]),
+                last_message_content=Coalesce(Subquery(last_message.values('content')[:1]), Value('No Content')),
                 last_message_time=Subquery(last_message.values('created')[:1]),
                 last_message_sender=Subquery(last_message.values('author__email')[:1])
             ).order_by('-last_message_time')
@@ -455,29 +463,40 @@ class AblyWebhookMessageView(View):
             data = json.loads(request.body)
             logger.info("Received webhook payload: %s", data)
 
-            # Process each item in the webhook
+            # Process each message in the webhook
             for message in data.get("messages", []):
                 event_name = message.get('name')
-                
-                # Assuming the event name and data format, adjust as needed
-                if event_name == 'new-message':  
-                    group_name = data.get('channel')
-                    author_email = message.get('clientId')
+                group_name = data.get('channel')
+                author_email = message.get('clientId')
+                created_at = message.get('timestamp')  # Expecting ISO format
+
+                if event_name == 'new-message':
                     body = message.get('data')
-                    created_at = message.get('timestamp')  # Expecting ISO format
-                    
-                    # Process incoming message by storing it in the database
-                    self.process_new_message(group_name, author_email, body, created_at)
+                    self.process_new_message(
+                        group_name, author_email, body, created_at
+                    )
+                elif event_name == 'new-file':
+                    file_data = message.get('data')
+                    logger.warning(file_data)
+                    self.process_file_message(
+                        group_name, author_email, file_data, created_at
+                    )
 
             return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
         except json.JSONDecodeError:
             logger.error("Invalid JSON received.")
-            return JsonResponse({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(
+                {'error': 'Invalid JSON'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         except Exception as e:
             logger.error(f"Error processing webhook: {str(e)}")
-            return JsonResponse({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse(
+                {'error': 'Internal Server Error'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def process_new_message(self, group_name, author_email, body, created_at):
         """
@@ -516,6 +535,44 @@ class AblyWebhookMessageView(View):
         except UserModel.DoesNotExist:
             logger.warning(f"User '{author_email}' does not exist.")
 
+    def process_file_message(self, group_name, author_email, file_data, created_at):
+        """
+        Processes and stores a new file message.
+        """
+        try:
+            chat_group = ChatGroup.objects.get(group_name=group_name)
+            author = UserModel.objects.get(email=author_email)
+
+            file_data = json.loads(file_data)
+
+            # Extract file details from file_data
+            file_name = file_data[0]
+            file_type = file_data[1]
+            file_url = file_data[2]
+            logger.warning(f"file name: {file_name}")
+            logger.warning(f"file name: {file_type}")
+            logger.warning(f"file name: {file_url}")
+
+
+            # Store the message with file details
+            GroupMessage.objects.create(
+                group=chat_group,
+                author=author,
+                file_url=file_url,
+                file_name=file_name,
+                file_type=file_type,
+                created=created_at
+            )
+            logger.info(
+                f"Stored new file message in group '{group_name}' from '{author_email}'."
+            )
+
+        except ChatGroup.DoesNotExist:
+            logger.warning(f"ChatGroup '{group_name}' does not exist.")
+        except UserModel.DoesNotExist:
+            logger.warning(f"User '{author_email}' does not exist.")
+        except Exception as e:
+            logger.error(f"Error processing file message: {str(e)}")
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com
 """

@@ -20,7 +20,7 @@ class UserProfile(models.Model):
     bio = models.TextField(blank=True, null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
     custom_gender = models.CharField(max_length=64, blank=True, null=True, help_text="If you select 'Custom', please specify here")
-
+    avatar_url = models.URLField(max_length=1024, blank=True, null=True)
 
     def __str__(self):
         """

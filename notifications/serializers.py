@@ -11,6 +11,7 @@ class NotificationSerializer(serializers.ModelSerializer):
     recipient_email = serializers.EmailField(source='recipient.email', read_only=True)
     sender_email = serializers.EmailField(source='sender.email', read_only=True, allow_null=True)
     content_object = serializers.SerializerMethodField()
+    sender_avatar_url = serializers.SerializerMethodField()
     class Meta:
         model = Notification
         fields = [
@@ -24,9 +25,17 @@ class NotificationSerializer(serializers.ModelSerializer):
             'content_object', 
             'message', 
             'timestamp',
-            'is_seen'
+            'is_seen',
+            'sender_avatar_url'
         ]
-        read_only_fields = ['timestamp']
+        read_only_fields = ['timestamp', 'sender_avatar_url']
+
+    def get_sender_avatar_url(self, obj):
+        sender = obj.sender
+        if sender and hasattr(sender, 'profile'):
+            return sender.profile.avatar_url
+        return None
+    
     def validate_notification_type(self, value):
         """
         Validate that the notification type is one of the allowed types.

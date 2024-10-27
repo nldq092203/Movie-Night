@@ -110,20 +110,18 @@ class GroupMessageSerializer(serializers.ModelSerializer):
     It also includes validation to ensure that either a message body or file is provided.
     """
     author = serializers.EmailField()  # Email of the message author
-    filename = serializers.ReadOnlyField()  # Filename if a file is attached to the message
-    is_image = serializers.ReadOnlyField()  # Boolean flag indicating if the file is an image
 
     class Meta:
         model = GroupMessage
-        fields = ['id', 'group', 'author', 'body', 'file', 'filename', 'is_image', 'created']
-        read_only_fields = ['filename', 'is_image', 'created']
+        fields = ['id', 'group', 'author', 'body', 'file_url', 'file_name', 'file_type', 'created']
+        read_only_fields = ['created']
 
     def validate(self, data):
         """
         Custom validation to ensure that either the message body or file is provided.
         If both are empty, a validation error is raised.
         """
-        if not data.get('body') and not data.get('file'):
+        if not data.get('body') and not data.get('file_url'):
             raise serializers.ValidationError("Either body text or file must be provided.")
         return data
     
