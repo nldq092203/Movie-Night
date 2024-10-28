@@ -6,14 +6,16 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
+import logging
 
 User = get_user_model()
-
+logger = logging.getLogger(__name__)
 
 class GoogleLoginAPIView(APIView):
     permission_classes = [AllowAny]
+
     @extend_schema(
         request=None,
         parameters=[
@@ -37,19 +39,20 @@ class GoogleLoginAPIView(APIView):
             return Response({'error': 'ID token is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Specify the CLIENT_ID of the app that accesses the backend:
+            # Specify the CLIENT_ID of the app that accesses the backend
             idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_CLIENT_ID)
 
-            # ID token is valid. Get the user's Google Account information.
+            # ID token is valid. Get the user's Google Account information
             email = idinfo['email']
             first_name = idinfo.get('given_name', '')
             last_name = idinfo.get('family_name', '')
 
-            # Check if user exists, if not create one
+            # Check if user exists; if not, create one
             user, created = User.objects.get_or_create(email=email, defaults={
                 'first_name': first_name,
                 'last_name': last_name,
             })
+
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
             return Response({
@@ -57,6 +60,11 @@ class GoogleLoginAPIView(APIView):
                 'access': str(refresh.access_token),
             }, status=status.HTTP_200_OK)
 
-        except ValueError:
+        except ValueError as e:
             # Invalid token
-            return Response({'error': 'Invalid ID token'}, status=status.HTTP_400_BAD_REQUEST)
+            logger.warning(f"Token verification failed: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            # Handle unexpected errors
+            logger.error(f"Unexpected error during Google login: {e}")
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

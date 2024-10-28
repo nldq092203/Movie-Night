@@ -12,22 +12,9 @@ services:
       - .:/app        
     env_file:
       - ./.env
-    environment:
-      - DATABASE_HOST=${DB_HOST}
-      - DATABASE_PORT=${DB_PORT}
-      - DATABASE_USER=${POSTGRES_USER}
-      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_NAME=${POSTGRES_DB}
     ports:
       - "8000:8000"
-    depends_on:
-      - redis
 
-  # Redis
-  redis:
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
 
   # Celery Worker
   celery:
@@ -41,15 +28,9 @@ services:
       - .:/app     
     env_file:
       - ./.env
-    environment:
-      - DATABASE_HOST=${DB_HOST}
-      - DATABASE_PORT=${DB_PORT}
-      - DATABASE_USER=${POSTGRES_USER}
-      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_NAME=${POSTGRES_DB}
     depends_on:
       - web
-      - redis
+
 
   # Celery Beat
   celery-beat:
@@ -63,12 +44,5 @@ services:
       - .:/app       
     env_file:
       - ./.env
-    environment:
-      - DATABASE_HOST=${DB_HOST}
-      - DATABASE_PORT=${DB_PORT}
-      - DATABASE_USER=${POSTGRES_USER}
-      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_NAME=${POSTGRES_DB}
     depends_on:
       - web
-      - redis

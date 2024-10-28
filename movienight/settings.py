@@ -37,8 +37,8 @@ class Dev(Configuration):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(True)
 
-    ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1", "9994-2a02-8428-81a3-a701-d871-ed23-88ac-5677.ngrok-free.app"])
-
+    # ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1", "9994-2a02-8428-81a3-a701-d871-ed23-88ac-5677.ngrok-free.app"])
+    ALLOWED_HOSTS = ['*']  
     AUTH_USER_MODEL = "movienight_auth.User"
 
     USE_SQLITE_FOR_TESTS = os.getenv('USE_SQLITE_FOR_TESTS') == 'True'
@@ -217,7 +217,7 @@ class Dev(Configuration):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
     # CORS
-    CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Front-end port
+    CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "https://backend-712033201668.europe-west9.run.app"]  # Front-end port
     CORS_ALLOW_CREDENTIALS = True # Credentials (cookies, authorization headers) can be included in cross-origin requests
 
     SPECTACULAR_SETTINGS = {
@@ -252,7 +252,7 @@ class Dev(Configuration):
             },
         },  
     }
-    BASE_URL = "http://localhost:8000" 
+    BASE_URL =  os.getenv('BASE_URL') 
 
     # CELERY 
     CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
@@ -286,7 +286,7 @@ class Dev(Configuration):
 
 class Prod(Dev):
     DEBUG = False
-    SECRET_KEY = values.SecretValue()
+    # SECRET_KEY = values.SecretValue()
     # DATABASES = {
     #     'default': values.DatabaseURLValue(
     #         default=f"postgres://{os.getenv('DB_USER', 'default')}:"
