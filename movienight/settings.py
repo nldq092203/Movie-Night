@@ -39,7 +39,14 @@ class Dev(Configuration):
     DEBUG = values.BooleanValue(True)
 
     # ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", "127.0.0.1", "9994-2a02-8428-81a3-a701-d871-ed23-88ac-5677.ngrok-free.app"])
-    ALLOWED_HOSTS = ['*']  
+    ALLOWED_HOSTS = [
+        'web-production-5212b.up.railway.app', 
+        'localhost',
+        '127.0.0.1',
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        'https://web-production-5212b.up.railway.app', 
+    ]
     AUTH_USER_MODEL = "movienight_auth.User"
 
     USE_SQLITE_FOR_TESTS = os.getenv('USE_SQLITE_FOR_TESTS') == 'True'
