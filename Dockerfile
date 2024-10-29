@@ -1,23 +1,23 @@
-# Stage 1: Build dependencies
-FROM python:3.9-slim AS builder
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app
-
-
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# Stage 2: Runtime
+# Base image
 FROM python:3.9-slim
+
+# Set the working directory
 WORKDIR /app
 
-COPY --from=builder /usr/local /usr/local
+# Copy project files
 COPY . .
 
-ENV PORT=8000
+# Install dependencies
+RUN pip install -r requirements.txt
+
+# Install supervisor to manage multiple processes
+RUN apt-get update && apt-get install -y supervisor
+
+# Copy the supervisor configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose the port for Django
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "movienight.wsgi:application"]
+# Start supervisor to manage all services
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
