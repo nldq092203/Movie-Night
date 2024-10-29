@@ -24,7 +24,7 @@ def search_and_save(search):
 
 @shared_task
 def send_invitation(mni_pk):
-    logger.info(f"Attempting to fetch MovieNightInvitation with pk={mni_pk}")
+    logger.warning(f"Attempting to fetch MovieNightInvitation with pk={mni_pk}")
     try:
         movie_night_invitation = MovieNightInvitation.objects.get(pk=mni_pk)
         notifications.send_invitation(movie_night_invitation)

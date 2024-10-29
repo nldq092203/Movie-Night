@@ -18,6 +18,7 @@ from configurations import Configuration, values
 import base64
 from firebase_admin import credentials, initialize_app
 from datetime import timedelta
+import dj_database_url
 
 from dotenv import load_dotenv
 
@@ -80,6 +81,7 @@ class Dev(Configuration):
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
     ]
 
     ROOT_URLCONF = 'movienight.urls'
@@ -108,14 +110,9 @@ class Dev(Configuration):
 
     # Database configuration
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'movie_night'),
-            'USER': os.getenv('POSTGRES_USER','user'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD','secret'),
-            'HOST': os.getenv('DB_HOST','db'),
-            'PORT': os.getenv('DB_PORT','5432'),
-        }
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL')
+        )
     }
 
     # Ensure tests use SQLite
@@ -186,9 +183,6 @@ class Dev(Configuration):
         #     "user_sustained": "5000/day",
         #     "user_burst": "100/minute",
         # },
-        "DEFAULT_PERMISSION_CLASSES": [
-            "rest_framework.permissions.IsAuthenticated",
-        ],
         "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
         "PAGE_SIZE": 20,
         "DEFAULT_FILTER_BACKENDS": [
@@ -216,8 +210,8 @@ class Dev(Configuration):
     }
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-    # CORS
-    CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "https://backend-712033201668.europe-west9.run.app"]  # Front-end port
+    # CORS      
+    CORS_ALLOW_ALL_ORIGINS = True    
     CORS_ALLOW_CREDENTIALS = True # Credentials (cookies, authorization headers) can be included in cross-origin requests
 
     SPECTACULAR_SETTINGS = {
@@ -282,6 +276,9 @@ class Dev(Configuration):
     initialize_app(cred, {
         'storageBucket': 'movie-night-609e1.appspot.com'  
     })
+
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 class Prod(Dev):

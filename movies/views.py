@@ -38,7 +38,7 @@ from movies.filters import (
     MyMovieNightFilterSet, 
     MovieNightInvitationFilterSet
     )
-from movies.permissions import MovieNightDetailPermission, MovieNightInvitationPermission, IsInvitee
+from movies.permissions import MovieNightDetailPermission, IsInvitee
 from django.db.models import Q
 from rest_framework.exceptions import PermissionDenied
 from celery.exceptions import TimeoutError
@@ -95,6 +95,7 @@ User = get_user_model()
 )
 class MovieSearchView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = [] 
 
     def post(self, request):
         """
@@ -155,6 +156,7 @@ class MovieSearchWaitView(APIView):
     API view to handle pending search results from a Celery task.
     """
     permission_classes = [AllowAny]
+    authentication_classes = [] 
     
     def get(self, request, result_uuid):
         term = request.query_params.get("search_term", "").strip()
@@ -186,6 +188,7 @@ class MovieSearchResultsView(ListAPIView):
     serializer_class = MovieSerializer
     pagination_class = PageNumberPagination
     permission_classes = [AllowAny]
+    authentication_classes = [] 
     queryset = Movie.objects.all()  # Define a default queryset
 
     def get_queryset(self):
@@ -279,10 +282,38 @@ class MovieView(ListAPIView):
     ordering_fields = ['year','runtime_minutes', 'title']
     queryset = Movie.objects.all()
     permission_classes = [AllowAny]
+    authentication_classes = [] 
     serializer_class = MovieSerializer
 
 
 ############ MovieNight ##############
+class MyMovieNightForAMovieView(ListCreateAPIView):
+    serializer_class = MovieNightSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_class = MyMovieNightFilterSet
+    ordering_fields = ["start_time", "movie"]
+
+    def get_queryset(self):
+        # Get the movie ID from the URL parameters
+        movie_id = self.kwargs.get("pk")
+        # Return movie nights for the current user filtered by the specified movie
+        return MovieNight.objects.filter(movie=movie_id, creator=self.request.user)
+
+    def perform_create(self, serializer):
+        """
+        Automatically set the creator of the movie night to the current authenticated user and the movie_id from the URL.
+        """
+        # Ensure start_notification_before is set to a default value (e.g., 0) if not provided
+        if 'start_notification_before' not in serializer.validated_data:
+            serializer.validated_data['start_notification_before'] = 0
+
+        # Add movie_id from the URL to validated_data
+        if 'movie' not in serializer.validated_data:
+            movie_id = self.kwargs.get("pk")
+            serializer.validated_data['movie'] = movie_id  # Ensure movie is in validated data
+
+        # Save with the creator and movie_id
+        serializer.save(creator=self.request.user)
 
 class MyMovieNightView(ListCreateAPIView):
     """
@@ -490,11 +521,11 @@ class MovieNightInvitationCreateView(CreateAPIView):
     This view allows the creator of a MovieNight to send invitations to other users.
     """
     serializer_class = MovieNightInvitationSerializer
-    permission_classes = [IsAuthenticated, MovieNightInvitationPermission]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         # Get the movie_night object
-        movie_night = MovieNight.objects.get(pk=self.kwargs['pk'])
+        movie_night = MovieNight.objects.get(id=self.kwargs['pk'])
         
         # Check if the request user is the creator of the movie night
         if movie_night.creator != self.request.user:
@@ -524,6 +555,7 @@ class GenreView(ListAPIView):
     """
     serializer_class = GenreSerializer
     permission_classes = [AllowAny]  
+    authentication_classes = [] 
     queryset = Genre.objects.all().order_by("name") 
 
 
@@ -535,6 +567,7 @@ class GenreDetailView(RetrieveAPIView):
     """
     serializer_class = GenreSerializer
     permission_classes = [AllowAny]  
+    authentication_classes = [] 
     queryset = Genre.objects.all()  
 
 

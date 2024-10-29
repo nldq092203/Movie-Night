@@ -14,12 +14,14 @@ from movies.views import (
     MovieNightInvitationDetailView,
     GenreView,
     GenreDetailView,
+    MyMovieNightForAMovieView
 )
 
 urlpatterns = [
     path("movies/search/", MovieSearchView.as_view(), name="movie_search"),
     path("movies/search-wait/<uuid:result_uuid>/", MovieSearchWaitView.as_view(), name="movie_search_wait"),
     path("movies/search-results/", MovieSearchResultsView.as_view(), name="movie_search_results"),
+    path("movies/<str:pk>/my-movie-nights/", MyMovieNightForAMovieView.as_view(), name="my_movienight"),
     path("movies/<str:pk>/", MovieDetailView.as_view(), name="movie_detail"),
     path("movies/", MovieView.as_view(), name="movie_list"),
     path("my-movie-nights/", MyMovieNightView.as_view(), name="my_movienight_list"),

@@ -29,17 +29,17 @@ class MovieNightDetailPermission(permissions.BasePermission):
         # For other methods, such as POST, PUT, DELETE, only the creator is allowed
         return obj.creator == request.user
 
-class MovieNightInvitationPermission(permissions.BasePermission):
-    """
-    Custom permission class to ensure that only the creator of the MovieNight
-    can send invitations for that MovieNight.
-    """
-    def has_permission(self, request, view):
-        movie_night_id = request.data.get('movie_night')
-        if not movie_night_id:
-            return False
-        movie_night = MovieNight.objects.get(pk=movie_night_id)
-        return movie_night.creator == request.user
+# class MovieNightInvitationPermission(permissions.BasePermission):
+#     """
+#     Custom permission class to ensure that only the creator of the MovieNight
+#     can send invitations for that MovieNight.
+#     """
+#     def has_permission(self, request, view):
+#         movie_night_id = request.da
+#         if not movie_night_id:
+#             return False
+#         movie_night = MovieNight.objects.get(id=movie_night_id)
+#         return movie_night.creator == request.user
 
 class IsInvitee(permissions.BasePermission):
     """

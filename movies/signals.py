@@ -17,7 +17,8 @@ from django.db.models.signals import post_save, pre_save, pre_delete
 from movies.models import MovieNightInvitation, MovieNight
 from movies import tasks
 from django.db import transaction
-
+import logging
+logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=MovieNightInvitation, dispatch_uid="invitation_created")
 def send_invitation(sender, instance, created, **kwargs):
@@ -35,8 +36,11 @@ def send_invitation(sender, instance, created, **kwargs):
         **kwargs: Additional keyword arguments.
     """
     if created:
+        logger.warning("In send_invitation")
         # Ensure the task runs only after the transaction is committed.
-        transaction.on_commit(lambda: tasks.send_invitation.delay(instance.pk))
+        # transaction.on_commit(lambda: tasks.send_invitation.delay(instance.pk))
+        tasks.send_invitation.delay(instance.pk)
+        logger.warning("In send_invitation")
 
 
 @receiver(pre_save, sender=MovieNightInvitation, dispatch_uid="invitation_updated")
