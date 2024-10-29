@@ -23,4 +23,4 @@ USER celeryuser
 EXPOSE 8000
 
 # Default command (will be overridden by Railway's start command)
-CMD ["celery", "-A", "movienight", "worker", "--loglevel=INFO", "--concurrency=2"]
+CMD ["gunicorn", "movienight.wsgi:application", "--bind", "0.0.0.0:8000"]
