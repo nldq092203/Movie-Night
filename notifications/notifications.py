@@ -111,7 +111,7 @@ def send_movie_night_update(movie_night, start_time):
     for recipient in recipients:
         serializer = NotificationSerializer(
             data={
-                'notificcation_type': 'UPD',
+                'notification_type': 'UPD',
                 'content_type': ContentType.objects.get_for_model(MovieNight).id,
                 'object_id': movie_night.id,
                 'message': f"{sender.email} have changed start time for a movie night to {start_time}."
