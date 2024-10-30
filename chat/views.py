@@ -185,16 +185,13 @@ class ChatGroupView(ListCreateAPIView):
         """
         is_private = request.data.get('is_private', False)
         member_emails = request.data.get('member_emails', [])  # List of member emails
-        logger.warning(member_emails)
-        logger.warning(len(member_emails))
-
 
         if len(member_emails) < 2:
             return Response({'message': 'At least two members are required for a private chat.'}, 
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-        if is_private=='true':
+        if is_private and len(member_emails) == 2:
             member_emails.sort()  # Ensure emails are in a consistent order to match the same group
 
             existing_group = ChatGroup.objects.filter(
@@ -212,7 +209,6 @@ class ChatGroupView(ListCreateAPIView):
         else:
             # For public groups, use the name from the request or generate a random name
             group_name = request.data.get('group_name', f'public-group-{get_random_string(10)}')
-            logger.warning(group_name)
         serializer = self.get_serializer(data={**request.data, 'group_name': group_name})
         serializer.is_valid(raise_exception=True)
         chat_group = serializer.save()
