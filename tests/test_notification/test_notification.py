@@ -125,7 +125,7 @@ class TestSendMovieNightUpdate:
         # Check if NotificationSerializer was called for the invitees
         mock_serializer.assert_called_once_with(
             data={
-                'notificcation_type': 'UPD',
+                'notification_type': 'UPD',
                 'content_type': ContentType.objects.get_for_model(MovieNight).id,
                 'object_id': movie_night.id,
                 'message': f"{movie_night.creator.email} have changed start time for a movie night to 2024-10-06 18:00."

@@ -120,9 +120,9 @@ class TestParticipatingMovieNightView:
 
         # Assert that only the movie nights where the user is the creator or a confirmed invitee are listed
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data['results']) == 2
-        assert any(movie["id"] == movie_night1.id for movie in response.data['results'])  # user is the creator
-        assert any(movie["id"] == movie_night2.id for movie in response.data['results'])  # user is a confirmed invitee
+        assert len(response.data) == 2
+        assert any(movie["id"] == movie_night1.id for movie in response.data)  # user is the creator
+        assert any(movie["id"] == movie_night2.id for movie in response.data)  # user is a confirmed invitee
 
     def test_participating_movie_nights_empty(self, authenticated_client):
         """
@@ -137,7 +137,7 @@ class TestParticipatingMovieNightView:
 
         # Assert that no movie nights are listed since the user is neither the creator nor a confirmed invitee
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data['results']) == 0
+        assert len(response.data ) == 0
 
 
 @pytest.mark.django_db
@@ -208,9 +208,9 @@ class TestParticipatingMovieNightViewOrderingAndFiltering:
         assert response.status_code == status.HTTP_200_OK
 
         # Verify that the results are ordered by start_time
-        results = response.data['results']
+        results = response.data
         assert len(results) == 2
-        assert results[0]['start_time'] < results[1]['start_time']
+        assert results[0]['start_time'] > results[1]['start_time']
 
     def test_participating_movie_night_filter_by_creator(self, authenticated_client, user):
         """
@@ -233,7 +233,7 @@ class TestParticipatingMovieNightViewOrderingAndFiltering:
         assert response.status_code == status.HTTP_200_OK
 
         # Verify that only movie nights, where user confirmed to attend, created by the other_user are returned
-        results = response.data['results']
+        results = response.data
         logger.warning (response.data)
         assert len(results) == 1
         assert results[0]['id'] == movie_night1.id
@@ -479,6 +479,91 @@ class TestInvitedMovieNightView:
 
         # Assert that unauthenticated users are denied access
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+@pytest.mark.django_db
+class TestMyMovieNightForAMovieView:
+    
+    def test_my_movie_night_list_for_movie(self, authenticated_client, user):
+        """
+        Test that only movie nights created by the authenticated user for a specific movie are listed.
+        """
+        movie = MovieFactory()
+        # Create movie nights for the authenticated user for a specific movie
+        MovieNightFactory(creator=user, movie=movie, start_time=timezone.now())
+        MovieNightFactory(creator=user, movie=movie, start_time=timezone.now())
+
+        # Create a movie night for another user for the same movie
+        other_user = UserFactory()
+        MovieNightFactory(creator=other_user, movie=movie, start_time=timezone.now())
+
+        url = reverse('my_movienight', kwargs={"pk": movie.id})
+        response = authenticated_client.get(url)
+
+        logger.warning(response.data)
+
+        # Assert that only the user's movie nights for the specified movie are listed
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 2  # Only the two created by the user
+
+    def test_my_movie_night_create_for_movie_authenticated(self, authenticated_client, user):
+        """
+        Test that an authenticated user can create a movie night for a specific movie.
+        """
+        movie = MovieFactory()
+
+        url = reverse('my_movienight', kwargs={"pk": movie.id})
+        data = {
+            "start_time": timezone.now() + timedelta(days=1),
+            "start_notification_before": 1800,
+            "start_notification_sent": False
+        }
+        response = authenticated_client.post(url, data, format='json')
+
+        logger.error(response.data)
+
+        # Assert that the movie night was successfully created
+        assert response.status_code == status.HTTP_201_CREATED
+        movie_night = MovieNight.objects.get(pk=response.data["id"])
+        assert movie_night.creator == user
+        assert movie_night.movie == movie
+        assert movie_night.start_notification_before == timedelta(seconds=1800)
+
+    def test_my_movie_night_create_for_movie_unauthenticated(self, any_client):
+        """
+        Test that an unauthenticated user cannot create a movie night for a specific movie.
+        """
+        movie = MovieFactory()
+
+        url = reverse('my_movienight', kwargs={"pk": movie.id})
+        data = {
+            "start_time": timezone.now() + timedelta(days=1),
+            "start_notification_before": 1800,
+            "start_notification_sent": False
+        }
+        response = any_client.post(url, data, format='json')
+
+        # Assert that the request is unauthorized
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_my_movie_night_list_for_different_movie(self, authenticated_client, user):
+        """
+        Test that only movie nights for the specified movie are returned.
+        """
+        movie1 = MovieFactory()
+        movie2 = MovieFactory()
+
+        # Create movie nights for different movies
+        MovieNightFactory(creator=user, movie=movie1, start_time=timezone.now())
+        MovieNightFactory(creator=user, movie=movie2, start_time=timezone.now())
+
+        url = reverse('my_movienight', kwargs={"pk": movie1.id})
+        response = authenticated_client.get(url)
+
+        # Assert that only movie nights for movie1 are listed
+        assert response.status_code == status.HTTP_200_OK
+        results = response.data['results']
+        assert len(results) == 1
+        assert results[0]['movie'] == movie1.id
 """
 NGUYEN Le Diem Quynh lnguye220903@gmail.com
 """

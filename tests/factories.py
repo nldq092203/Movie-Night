@@ -114,6 +114,7 @@ class NotificationFactory(DjangoModelFactory):
     notification_type = "INV"
     content_object = factory.SubFactory(MovieNightFactory)
     timestamp = timezone.now()
+    object_id = 0
 
     @factory.lazy_attribute
     def content_type(self):

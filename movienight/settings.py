@@ -49,8 +49,6 @@ class Dev(Configuration):
     ]
     AUTH_USER_MODEL = "movienight_auth.User"
 
-    USE_SQLITE_FOR_TESTS = os.getenv('USE_SQLITE_FOR_TESTS') == 'True'
-
 
     # Application definition
 
@@ -123,10 +121,10 @@ class Dev(Configuration):
     }
 
     # Ensure tests use SQLite
-    if 'test' in sys.argv or USE_SQLITE_FOR_TESTS:
+    if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
         DATABASES['default'] = {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
+            'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  # or use ':memory:' for in-memory
         }
     # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
 
@@ -218,7 +216,11 @@ class Dev(Configuration):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
     # CORS      
-    CORS_ALLOW_ALL_ORIGINS = True    
+    CORS_ALLOWED_ORIGINS = [ 
+        "http://localhost:5173",
+        "http://localhost",
+        "https://movie-night-ui.vercel.app" 
+    ]
     CORS_ALLOW_CREDENTIALS = True # Credentials (cookies, authorization headers) can be included in cross-origin requests
 
     SPECTACULAR_SETTINGS = {

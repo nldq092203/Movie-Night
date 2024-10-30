@@ -288,6 +288,13 @@ class MovieView(ListAPIView):
 
 ############ MovieNight ##############
 class MyMovieNightForAMovieView(ListCreateAPIView):
+
+    """
+    View for listing and creating MovieNight instances that are created by the currently authenticated user for a specific movie.
+
+    - GET: Lists movie nights created by the current user for a movie pk.
+    - POST: Allows the current user to create a new movie night for a movie.
+    """
     serializer_class = MovieNightSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = MyMovieNightFilterSet
@@ -299,20 +306,29 @@ class MyMovieNightForAMovieView(ListCreateAPIView):
         # Return movie nights for the current user filtered by the specified movie
         return MovieNight.objects.filter(movie=movie_id, creator=self.request.user)
 
+    def get_serializer(self, *args, **kwargs):
+        # Get the serializer class
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            # For POST, PUT, PATCH methods, add 'movie' to the data before validation
+            data = kwargs.get('data', {})
+            if isinstance(data, list):
+                # Handle list input for bulk operations
+                for item in data:
+                    item['movie'] = self.kwargs.get('pk')
+            else:
+                data['movie'] = self.kwargs.get('pk')
+            kwargs['data'] = data
+
+        return serializer_class(*args, **kwargs)
+
     def perform_create(self, serializer):
         """
-        Automatically set the creator of the movie night to the current authenticated user and the movie_id from the URL.
+        Automatically set the creator of the movie night to the current authenticated user.
         """
-        # Ensure start_notification_before is set to a default value (e.g., 0) if not provided
-        if 'start_notification_before' not in serializer.validated_data:
-            serializer.validated_data['start_notification_before'] = 0
-
-        # Add movie_id from the URL to validated_data
-        if 'movie' not in serializer.validated_data:
-            movie_id = self.kwargs.get("pk")
-            serializer.validated_data['movie'] = movie_id  # Ensure movie is in validated data
-
-        # Save with the creator and movie_id
+        # Save with the creator
         serializer.save(creator=self.request.user)
 
 class MyMovieNightView(ListCreateAPIView):
