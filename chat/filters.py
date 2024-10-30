@@ -1,7 +1,10 @@
 from django_filters import rest_framework as filters
 from chat.models import ChatGroup, GroupMessage
 from django.db.models import Q
+import logging 
 
+
+logger = logging.getLogger(__name__)
 class ChatGroupFilter(filters.FilterSet):
     """
     This filter class is used for filtering chat groups based on various attributes such as:
@@ -54,7 +57,16 @@ class ChatGroupFilter(filters.FilterSet):
     
 class GroupMessageFilter(filters.FilterSet):
     body = filters.CharFilter(field_name='body', lookup_expr='icontains')
+    created_from = filters.DateTimeFilter(
+        field_name="created", lookup_expr="gte", label="Created From"
+    )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Log the created_from value to check format and parsing
+        created_from_value = self.data.get('created_from')
+        if created_from_value:
+            logger.warning(f"Created From Filter Value: {created_from_value}")
     class Meta:
         model = GroupMessage
-        fields = ['body']
+        fields = ['body', 'created_from']
