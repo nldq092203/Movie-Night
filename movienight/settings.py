@@ -216,11 +216,12 @@ class Dev(Configuration):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
     # CORS      
-    CORS_ALLOWED_ORIGINS = [ 
-        "http://localhost:5173",
-        "http://localhost",
-        "https://movie-night-ui.vercel.app" 
-    ]
+    # CORS_ALLOWED_ORIGINS = [ 
+    #     "http://localhost:5173",
+    #     "http://localhost",
+    #     "https://movie-night-ui.vercel.app" 
+    # ]
+    CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOW_CREDENTIALS = True # Credentials (cookies, authorization headers) can be included in cross-origin requests
 
     SPECTACULAR_SETTINGS = {
