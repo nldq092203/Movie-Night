@@ -14,6 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       USE_SQLITE_FOR_TESTS: "True"
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      BASE_URL: ${{ secrets.BASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
+      FIREBASE_ADMINSDK_KEY: ${{ secrets.FIREBASE_ADMINSDK_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
