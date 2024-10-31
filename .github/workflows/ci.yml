@@ -7,7 +7,7 @@ on:
       - main  # Run tests on every push to the main branch
   pull_request:
     branches:
-      - main  # Run tests on PRs to main branch
+      - main  
 
 jobs:
   test:
