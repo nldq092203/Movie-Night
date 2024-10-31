@@ -167,7 +167,6 @@ class Dev(Configuration):
 
     STATIC_URL = '/static/'
 
-    OMDB_KEY = "e1406b6f"
     
     REST_FRAMEWORK = {
         "DEFAULT_SCHEMA_CLASS": 'drf_spectacular.openapi.AutoSchema',
@@ -290,6 +289,8 @@ class Dev(Configuration):
 
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    OMDB_KEY = os.getenv('OMDB_KEY', "e1406b6f")
 
 
 class Prod(Dev):

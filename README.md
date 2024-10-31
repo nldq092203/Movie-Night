@@ -1,8 +1,6 @@
 # Movie Night Together 
 
-**Movie Night Together** is a full-stack web application designed to organize movie nights effortlessly. Users can search for movies, create events, invite others, receive notifications and chat with others or groups — all within a user-friendly interface.
-
-**Movie Night UI - Frontend** access [Movie-Night-UI](https://github.com/nldq092203/Movie-Night-UI.git)
+***Movie Night Together*** is a full-stack web application designed as a social platform to simplify organizing movie night events. With Movie Night Together, users can effortlessly search for movies, create and manage events, invite friends, receive notifications, and chat individually or in groups—all within an intuitive and user-friendly interface.
 
 ## Table of Contents
 
@@ -10,187 +8,211 @@
 - [Tech Stack](#tech-stack)
   - [Backend](#backend)
   - [Frontend](#frontend)
-- [Database UML Diagram](#database-uml-diagram)
-- [Installation and Usage](#installation-and-usage)
-  - [Prerequisites](#prerequisites)
-  - [Clone the Repository](#clone-the-repository)
-  - [Environment Variables](#environment-variables)
-  - [Docker Setup](#docker-setup)
+  - [CI/CD](#ci/cd)
 - [Accessibility](#accessibility)
-- [Docker Compose Configuration](#docker-compose-configuration)
-- [API Documentation](#api-documentation)
-- [Testing](#testing)
-  - [Running Tests](#running-tests)
-  - [Testing Tools](#testing-tools)
-  - [Testing Components](#testing-components)
-  - [Mocking External Services](#mocking-external-services)
+- [Database UML Diagram](#database-uml-diagram)
+- [Development](#development)
+  - [Installation and Usage](#installation-and-usage)
+    - [Prerequisites](#prerequisites)
+    - [Clone the Repository](#clone-the-repository)
+    - [Environment Variables](#environment-variables)
+    - [Docker Setup](#docker-setup)
+
+  - [API Documentation](#api-documentation)
+  - [Testing](#testing)
+    - [Running Tests](#running-tests)
+    - [Testing Tools](#testing-tools)
+    - [Testing Components](#testing-components)
+    - [Mocking External Services](#mocking-external-services)
 - [Contact](#contact)
 
+## Accessibility
+
+- Visit [Project Website](https://movienight-ui-550865855378.europe-west9.run.app) to access the live application.
+- Visit [Movie-Night-UI](https://github.com/nldq092203/Movie-Night-UI.git) to access Frontend project.
+
 ## Features
+🔐 User Authentication and Authorization
 
+	•	JWT Authentication: Secure login and registration with JSON Web Tokens (JWT) for session management.
+	•	Google OAuth2 Integration: Simplified login with Google accounts for faster access.
 
-- **User Authentication and Authorization**: Secure user registration and login using JWT tokens, with Google OAuth2 integration.
-- **Movie Search**: Search for movies using the OMDb API and store them locally.
-- **Movie Details**: View comprehensive movie information, including genres, ratings, and full descriptions.
-- **Movie Night Creation**: Organize movie nights and invite friends seamlessly.
-- **Invitation Management**: Send, manage, and confirm invitations for movie nights.
-- **Notifications**: Receive timely notifications via asynchronous tasks for:
-  - **Upcoming Movie Night Reminders**: Get reminders before scheduled events.
-  - **Start Time Updates**: Be informed of any changes to the event's start time.
-  - **Cancellations**: Receive alerts if a movie night is canceled.
-  - **New Invitations**: Get notified when you're invited to a movie night.
-  - **Invitation Confirmations**: Hosts are notified when guests accept invitations.
-- **Filtering and Sorting**: Easily filter and sort movies, events, notifications, group chat and message.
-- **Asynchronous Tasks**: Utilize Celery and Redis for handling background tasks and scheduled notifications.
-- **Web Socket**: Set up web socket for chatbox
-- **Throttling and Pagination**: Efficient data handling with API usage control and paginated results.
-- **CORS Support**: Cross-origin resource sharing enabled for broader accessibility.
-- **API Documentation**: Comprehensive documentation generated with Swagger/OpenAPI.
-- **TypeScript Support**: Custom types and interfaces for consistent data structures.
-- ...
+🕒 Asynchronous Tasks
 
-## Tech Stack
+	•	Background Processing with Celery and Redis: Offload heavy operations and enable scheduled notifications using Celery and Redis.
 
-### Backend
+🔄 Real-Time Chat with WebSockets
 
-- **Frameworks**: Django, Django REST Framework (DRF)
-- **Authentication**: Djoser, JWT, Google OAuth2
-- **Asynchronous Tasks**: Celery, Redis
-- **Database**: PostgreSQL (SQLite for test)
-- **External APIs**: OMDb API
-- **Documentation**: Swagger/OpenAPI
-- **Testing**: Pytest, Factory Boy
-- **Containerization**: Docker, Docker Compose
-- **TypeScript**: For shared data structures and contracts
+	•	Instant Messaging: Real-time chatbox to communicate instantly with other users, powered by WebSocket technology.
+
+🎥 Movie Management
+
+	•	Movie Search: Search movies using the OMDb API, and store data locally for quicker future access.
+	•	Detailed Movie Pages: View extensive details, including genres, ratings, and descriptions.
+
+🎬 Movie Night Event Organization
+
+	•	Create and Manage Events: Organize and manage movie nights, including scheduling, invite management, and start time updates.
+	•	Invitation System: Send, manage, and confirm invitations for movie nights with real-time updates.
+  
+🎬 Event Notifications
+
+	•	Reminders: Stay updated with timely reminders before your upcoming movie nights.
+	•	Event Updates: Instantly notified of start time adjustments or event cancellations.
+	•	New Invitations: Receive alerts when you’re invited to new movie nights.
+	•	Invitation Confirmations: As a host, get notified when invitees confirm their attendance.
+
+💬 Chatbox Features
+
+	•	Private and Group Chat Creation: Easily set up chat groups for private or public discussions.
+	•	Nickname Customization: Assign nicknames in group chats for personalized interactions.
+	•	Message Search: Search messages and chatbox names to quickly locate conversations.
+
+👤 User Profile Management
+
+	•	Profile Customization: Update your avatar, name, gender, bio, and manage your personal event schedule.
+
+🔎 Advanced Filtering and Sorting
+
+	•	Enhanced Data Navigation: Filter and sort data across movies, events, notifications, chat groups, and messages for a tailored user experience.
+
+📊 API Throttling and Pagination
+
+	•	Efficient Data Handling: Control API usage and retrieve data in paginated results to optimize load times and performance.
+
+🌍 CORS Support
+
+	•	Cross-Origin Resource Sharing: Safely enable cross-origin access for broader accessibility to your application.
+
+📄 Comprehensive API Documentation
+
+	•	Swagger/OpenAPI Documentation: Easily reference API endpoints, request parameters, and responses with well-organized documentation.
+
+⚙️ TypeScript Support
+
+	•	Static Typing: Utilize custom types and interfaces for robust, consistent data structures and improved code quality.
 
 ### Frontend
 
-- **Framework**: React.js with TypeScript
+- **Framework**: React.js 
 - **Styling**: Tailwind CSS
-- **State Management**: Redux (optional)
 - **Routing**: React Router
 - **HTTP Client**: Axios
 - **Build Tool**: Vite
 
+### CI/CD
+- **Source Control**: GitHub
+- **CI/CD Pipeline**: Github Action
+- **Build Tools**: Docker
+- **Testing**: Pytest, Factory Boy, APIClient, Postman
+- **Deployment**: Google Cloud Run, Railway
 ## Database UML Diagram
 Below is the database UML diagram illustrating the data structure:
 ![Database UML Diagram](./movienight-uml.drawio.png)
 
-## Installation and Usage
+## Development
+### Installation and Usage
 
-### Prerequisites
+#### Prerequisites
 
 - Docker & Docker Compose: Ensure both are installed on your system.
 
-### Clone the Repository
-
+#### Clone the Repository
+##### Backend Repo
 ```bash
 https://github.com/nldq092203/Movie-Night.git
 cd Movie-Night
 
 ```
 
-### Environment Variables
+##### Frontend Repo
+```bash
+git clone https://github.com/nldq092203/Movie-Night-UI.git
+cd Movie-Night-UI
+```
 
+#### Environment Variables
 ```bash
 # Django settings
 SECRET_KEY=your_secret_key
-DEBUG=True
 
 # Database settings
-POSTGRES_USER=your_postgres_user
-POSTGRES_PASSWORD=your_postgres_password
-POSTGRES_DB=your_postgres_db
-DB_HOST = db
-DB_PORT = 5432
+DATABASE_URL=your_database_url
 
 # Redis settings
-REDIS_URL=redis://redis:6379/0
+REDIS_URL=your_redis_url
 
 # External API keys
-OMDB_API_KEY=your_omdb_api_key
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=your_google_client_id
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=your_google_client_secret
+OMDB_KEY=your_omdb_api_key
+SOCIAL_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+ABLY_API_KEY=your_ably_api_key
+FIREBASE_ADMINSDK_KEY=your_firebase_key
 ```
 
-### Docker Setup
+#### Docker Setup
 
-#### 1. Build and Start Containers:
+##### 1. Build and Start Containers:
 
 ```bash
 docker-compose up --build
 
 ```
 
-#### 2.Run Database Migrations (Optional)
+##### 2.Run Database Migrations (Optional)
 
 ```bash
 docker-compose exec web python manage.py migrate
 
 ```
 
-#### 3. Create a Superuser:
+##### 3. Create a Superuser:
 
 ```bash
 docker-compose exec web python manage.py createsuperuser
 ```
 
-#### 4. Stop the application
+##### 4. Stop the application
 ```bash
 docker-compose down
 ```
 
-## Accessibility
 
-- Visit `http://localhost:8000/` to access the application.
-- Admin interface at `http://localhost:8000/admin/`.
-- Frontend Application: Accessible at `http://localhost:5173/`
-
-
-## Docker Compose Configuration
-The docker-compose.yml file includes services for:
-
-- **web: The Django application.**
-- **db: PostgreSQL database.**
-- **redis: Redis server for Celery.**
-- **celery: Celery worker for asynchronous tasks.**
-- **celery-beat: Celery Beat scheduler for periodic tasks.**
-- **frontend: The React frontend application.**    
-
-## API Documentation
+### API Documentation
 
 The API is documented using Swagger/OpenAPI.
-Swagger UI: Accessible at `http://localhost:8000/api/schema/swagger-ui`.
+Swagger UI: 
+Accessible at `http://localhost:8000/api/schema/swagger-ui`.
 
-### Generating API Schema
+#### Generating API Schema
 
 ```bash
 python manage.py spectacular --file schema.yaml
 
 ```
 
-### Generating TypeScript Types (Optional)
+#### Generating TypeScript Types (Optional)
 
 ```bash
 npx openapi-typescript schema.yaml --output types.ts
 
 ```
 
-## Testing
+### Testing
 
-### Running Tests
+#### Running Tests
 
 ```bash
 docker-compose exec web pytest
 ```
 
-### Testing Tools
+#### Testing Tools
 
 - **Pytest**: Testing framework.
 - **Factory Boy**: For creating test data.
 - **APIClient**: To simulate API requests in tests.
 
-### Testing Components
+#### Testing Components
 
 - **Models**: Test the integrity and behavior of models.
 - **Views and APIs**: Test API endpoints, permissions, filters, and pagination.
@@ -198,7 +220,7 @@ docker-compose exec web pytest
 - **Serializers**: Ensure data serialization and deserialization works as expected.
 - **URLs**: Test that all routes are correctly mapped and accessible, and that they return the expected responses. 
 
-### Mocking External Services
+#### Mocking External Services
 
 Use mocking to simulate external API calls (e.g., OMDb API) during tests to avoid hitting real endpoints.
 
