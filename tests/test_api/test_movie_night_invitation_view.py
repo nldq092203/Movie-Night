@@ -19,11 +19,20 @@ from tests.factories import UserFactory, MovieNightFactory, MovieNightInvitation
 from django.utils import timezone
 from datetime import timedelta
 import logging
-
+from django.db.models.signals import post_save
+from movies.signals import send_invitation
 logger = logging.getLogger(__name__)
 
 @pytest.mark.django_db
 class TestMyMovieNightInvitation:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
 
     def test_movie_night_invitations_list(self, authenticated_client, user):
         """
@@ -103,7 +112,15 @@ class TestMyMovieNightInvitation:
 
 @pytest.mark.django_db
 class TestMovieNightInvitationCreateView:
-    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
+
     def test_create_invitation_as_creator(self, authenticated_client, user):
         """
         Test that the creator of the MovieNight can create an invitation.
@@ -180,7 +197,15 @@ class TestMovieNightInvitationCreateView:
 
 @pytest.mark.django_db
 class TestMovieNightInvitationDetailView:
-    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
+            
     def test_retrieve_invitation_as_invitee(self, authenticated_client, user):
         """
         Test that the invitee can retrieve their own invitation details.

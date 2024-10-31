@@ -21,6 +21,7 @@ jobs:
       REDIS_URL: ${{ secrets.REDIS_URL }}
       ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
       FIREBASE_ADMINSDK_KEY: ${{ secrets.FIREBASE_ADMINSDK_KEY }}
+      USE_CELERY_TASK_ALWAYS_EAGER: ${{ secrets.USE_CELERY_TASK_ALWAYS_EAGER }}
 
     steps:
       - name: Checkout code

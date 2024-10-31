@@ -17,7 +17,7 @@ class TestMovieNightInvitation:
         user = UserFactory(email="invitee@example.com")
         movie_night = MovieNightFactory()
 
-        invitation = MovieNightInvitation.objects.create(
+        invitation = MovieNightInvitationFactory(
             movie_night=movie_night,
             invitee=user,
             attendance_confirmed=False,

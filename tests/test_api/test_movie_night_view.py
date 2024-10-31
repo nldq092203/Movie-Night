@@ -28,6 +28,8 @@ from tests.factories import UserFactory, MovieFactory, MovieNightFactory, MovieN
 from django.utils import timezone
 from datetime import timedelta
 import logging
+from django.db.models.signals import post_save
+from movies.signals import send_invitation
 
 logger = logging.getLogger(__name__)
 @pytest.mark.django_db
@@ -96,6 +98,14 @@ class TestMyMovieNightView:
 
 @pytest.mark.django_db
 class TestParticipatingMovieNightView:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
     def test_participating_movie_nights(self, authenticated_client, user):
         """
         Test that the view lists movie nights where the authenticated user is either the creator or a confirmed invitee.
@@ -242,6 +252,14 @@ class TestParticipatingMovieNightViewOrderingAndFiltering:
 
 @pytest.mark.django_db
 class TestMovieNightDetailView:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
 
     def test_movie_night_detail_view_creator(self, authenticated_client, user):
         """
@@ -405,7 +423,15 @@ class TestMovieNightDetailView:
 
 @pytest.mark.django_db
 class TestInvitedMovieNightView:
-    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
+            
     def test_list_invited_movie_nights(self, authenticated_client, user):
         """
         Test that the authenticated user can list movie nights they have been invited to.

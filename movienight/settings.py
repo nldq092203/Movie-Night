@@ -121,8 +121,8 @@ class Dev(Configuration):
                 'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
             }
         }
-        CELERY_BROKER_URL = ''  # Separate Redis DB for tests
-        CELERY_RESULT_BACKEND = ''
+        CELERY_TASK_ALWAYS_EAGER = os.getenv("USE_CELERY_TASK_ALWAYS_EAGER", "False") == "True"
+        CELERY_TASK_EAGER_PROPAGATES = True 
     else:
         DATABASES = {
             'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))

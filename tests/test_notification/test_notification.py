@@ -29,11 +29,20 @@ from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from movies.models import MovieNightInvitation, MovieNight
 from tests.factories import MovieNightFactory, MovieNightInvitationFactory, UserFactory
-
+from django.db.models.signals import post_save
+from movies.signals import send_invitation
 
 @pytest.mark.django_db
 class TestSendInvitation:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
+        
     @mock.patch('notifications.notifications.NotificationSerializer') 
     def test_send_invitation(self, mock_serializer):
         """
@@ -103,7 +112,14 @@ class TestSendAttendanceChange:
 
 @pytest.mark.django_db
 class TestSendMovieNightUpdate:
-    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)    
     @mock.patch('notifications.notifications.NotificationSerializer')
     def test_send_movie_night_update(self, mock_serializer):
         """
@@ -139,7 +155,15 @@ class TestSendMovieNightUpdate:
 
 @pytest.mark.django_db
 class TestSendStartingNotification:
-    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)    
+
     @mock.patch('notifications.notifications.NotificationSerializer')
     def test_send_starting_notification(self, mock_serializer):
         """

@@ -24,9 +24,10 @@ import pytest
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from notifications.serializers import NotificationSerializer
-from movies.models import MovieNight
+from movies.models import MovieNight, MovieNightInvitation
 from tests.factories import UserFactory, MovieNightFactory, MovieNightInvitationFactory, NotificationFactory
-
+from django.db.models.signals import post_save
+from movies.signals import send_invitation
 
 @pytest.mark.django_db
 class TestNotificationSerializer:
@@ -34,7 +35,14 @@ class TestNotificationSerializer:
     Test cases for NotificationSerializer to ensure it serializes and deserializes 
     Notification objects correctly.
     """
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
     def test_valid_notification_serialization(self):
         """
         Test that a valid Notification object is serialized correctly.

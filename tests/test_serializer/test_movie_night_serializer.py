@@ -7,7 +7,8 @@ from movies.serializers import MovieNightSerializer, MovieNightDetailSerializer
 from tests.factories import UserFactory, MovieFactory, MovieNightInvitationFactory, MovieNightFactory
 from django.utils import timezone
 from datetime import timedelta
-
+from django.db.models.signals import post_save
+from movies.signals import send_invitation
 @pytest.mark.django_db
 class TestMovieNightSerializer:
     def test_movie_night_serializer_serialization(self):
@@ -94,6 +95,14 @@ class TestMovieNightSerializer:
 
 @pytest.mark.django_db
 class TestMovieNightDetailSerializer:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
     def test_movie_night_detail_serializer_serialization(self):
         """
         Test that MovieNightSerializer correctly serializes a MovieNight instance,

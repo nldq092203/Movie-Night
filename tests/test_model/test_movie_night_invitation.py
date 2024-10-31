@@ -8,6 +8,8 @@ from movies.models import MovieNightInvitation
 from tests.factories import UserFactory, MovieNightFactory
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from django.db.models.signals import post_save
+from movies.signals import send_invitation
 
 @pytest.mark.django_db
 class TestMovieNightInvitation:
@@ -15,6 +17,11 @@ class TestMovieNightInvitation:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.invitation = MovieNightInvitationFactory()
+        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
+
+    def tearDown(self):
+        # Reconnect the signal after tests
+        post_save.connect(send_invitation, sender=MovieNightInvitation)
 
     def test_movienight_invitation_creation(self):
         
