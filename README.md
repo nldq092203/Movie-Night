@@ -92,6 +92,18 @@
 
 	•	Static Typing: Utilize custom types and interfaces for robust, consistent data structures and improved code quality.
 
+## Tech Stack
+### Backend
+- **Frameworks**: Django, Django REST Framework (DRF)
+- **Authentication**: Djoser, JWT, Google OAuth2
+- **Asynchronous Tasks**: Celery, Redis
+- **Database**: PostgreSQL (SQLite for test)
+- **External APIs**: OMDb API
+- **Documentation**: Swagger/OpenAPI
+- **Testing**: Pytest, Factory Boy
+- **Containerization**: Docker, Docker Compose
+- **TypeScript**: For shared data structures and contracts
+
 ### Frontend
 
 - **Framework**: React.js 
