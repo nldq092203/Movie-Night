@@ -96,11 +96,12 @@
 ### Backend
 - **Frameworks**: Django, Django REST Framework (DRF)
 - **Authentication**: Djoser, JWT, Google OAuth2
-- **Asynchronous Tasks**: Celery, Redis
+- **Web Socket**: Ably (third party)
+- **Asynchronous and Scheduled Tasks**: Celery, Redis
 - **Database**: PostgreSQL (SQLite for test)
+- **Cloud Storage**: Firebase
 - **External APIs**: OMDb API
 - **Documentation**: Swagger/OpenAPI
-- **Testing**: Pytest, Factory Boy
 - **Containerization**: Docker, Docker Compose
 - **TypeScript**: For shared data structures and contracts
 
