@@ -121,8 +121,8 @@ class Dev(Configuration):
                 'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
             }
         }
-        CELERY_BROKER_URL = 'redis://localhost:6379/1'  # Separate Redis DB for tests
-        CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+        CELERY_BROKER_URL = ''  # Separate Redis DB for tests
+        CELERY_RESULT_BACKEND = ''
     else:
         DATABASES = {
             'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
