@@ -1,13 +1,12 @@
 # Movie Night Together 
 
-**Movie Night Together** is a full-stack web application designed to help friends and family organize movie nights effortlessly. Users can search for movies, create events, invite others, and receive notifications—all within a user-friendly interface.
+**Movie Night Together** is a full-stack web application designed to help friends and family organize movie nights effortlessly. Users can search for movies, create events, invite others, receive notifications and chat with others or groups — all within a user-friendly interface.
 
 **Movie Night UI - Frontend** access [Movie-Night-UI](https://github.com/nldq092203/Movie-Night-UI.git)
+
 ## Table of Contents
 
 - [Features](#features)
-  - [Backend Features](#backend-features)
-  - [Frontend Features](#frontend-features)
 - [Tech Stack](#tech-stack)
   - [Backend](#backend)
   - [Frontend](#frontend)
@@ -26,12 +25,12 @@
   - [Testing Components](#testing-components)
   - [Mocking External Services](#mocking-external-services)
 - [Contact](#contact)
+
 ## Features
 
-### Backend Features
 
 - **User Authentication and Authorization**: Secure user registration and login using JWT tokens, with Google OAuth2 integration.
-- **Movie Search**: Search for movies using the OMDb API and store them locally (48h update for a search).
+- **Movie Search**: Search for movies using the OMDb API and store them locally.
 - **Movie Details**: View comprehensive movie information, including genres, ratings, and full descriptions.
 - **Movie Night Creation**: Organize movie nights and invite friends seamlessly.
 - **Invitation Management**: Send, manage, and confirm invitations for movie nights.
@@ -41,20 +40,14 @@
   - **Cancellations**: Receive alerts if a movie night is canceled.
   - **New Invitations**: Get notified when you're invited to a movie night.
   - **Invitation Confirmations**: Hosts are notified when guests accept invitations.
-- **Filtering and Sorting**: Easily filter and sort movies, events, and notifications.
+- **Filtering and Sorting**: Easily filter and sort movies, events, notifications, group chat and message.
 - **Asynchronous Tasks**: Utilize Celery and Redis for handling background tasks and scheduled notifications.
+- **Web Socket**: Set up web socket for chatbox
 - **Throttling and Pagination**: Efficient data handling with API usage control and paginated results.
 - **CORS Support**: Cross-origin resource sharing enabled for broader accessibility.
 - **API Documentation**: Comprehensive documentation generated with Swagger/OpenAPI.
 - **TypeScript Support**: Custom types and interfaces for consistent data structures.
-
-### Frontend Features
-
-- **User Authentication**: Secure login and registration with JWT and Google OAuth2.
-- **Form Validation**: Client-side validation for all forms to enhance user experience.
-- **Movie Search and Details**: Intuitive interface for searching and viewing movie details.
-- **Event Management**: Create and manage movie night events, send invitations, and handle notifications.
-- **Responsive Design**: Optimized for all devices using React and Tailwind CSS.
+- ...
 
 ## Tech Stack
 
@@ -63,7 +56,7 @@
 - **Frameworks**: Django, Django REST Framework (DRF)
 - **Authentication**: Djoser, JWT, Google OAuth2
 - **Asynchronous Tasks**: Celery, Redis
-- **Database**: PostgreSQL (SQLite for development)
+- **Database**: PostgreSQL (SQLite for test)
 - **External APIs**: OMDb API
 - **Documentation**: Swagger/OpenAPI
 - **Testing**: Pytest, Factory Boy

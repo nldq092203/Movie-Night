@@ -114,17 +114,18 @@ class Dev(Configuration):
     # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
     # Database configuration
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL')
-        )
-    }
-
-    # Ensure tests use SQLite
     if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
-        DATABASES['default'] = {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  # or use ':memory:' for in-memory
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
+            }
+        }
+        CELERY_BROKER_URL = 'redis://localhost:6379/1'  # Separate Redis DB for tests
+        CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+    else:
+        DATABASES = {
+            'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
         }
     # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
 
