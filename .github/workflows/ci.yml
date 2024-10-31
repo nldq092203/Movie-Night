@@ -22,6 +22,7 @@ jobs:
       ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
       FIREBASE_ADMINSDK_KEY: ${{ secrets.FIREBASE_ADMINSDK_KEY }}
       USE_CELERY_TASK_ALWAYS_EAGER: ${{ secrets.USE_CELERY_TASK_ALWAYS_EAGER }}
+      CELERY_TASK_EAGER_PROPAGATES: ${{ secrets.CELERY_TASK_EAGER_PROPAGATES }}
 
     steps:
       - name: Checkout code

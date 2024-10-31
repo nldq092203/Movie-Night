@@ -7,10 +7,11 @@ from movies.serializers import MovieNightInvitationSerializer
 from tests.factories import UserFactory, MovieFactory, MovieNightFactory, MovieNightInvitationFactory
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
+from unittest.mock import patch
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestMovieNightInvitation:
-    def test_movie_night_invitation_serializer_serialization(self):
+    def test_movie_night_invitation_serializer_serialization(self, mock_send_invitation):
         """
         Test that MovieNightInvitationSerializer correctly serializes a MovieNightInvitation instance.
         """
@@ -35,7 +36,7 @@ class TestMovieNightInvitation:
 
 
 
-    def test_movie_night_invitation_serializer_deserialization(self):
+    def test_movie_night_invitation_serializer_deserialization(self, mock_send_invitation):
         """
         Test that MovieNightInvitationSerializer correctly deserializes input data and creates a MovieNightInvitation instance.
         """
@@ -60,7 +61,7 @@ class TestMovieNightInvitation:
         assert invitation.attendance_confirmed is False
         assert invitation.is_attending is False
 
-    def test_invitation_serializer_duplicate(self):
+    def test_invitation_serializer_duplicate(self, mock_send_invitation):
         """
         Test that the serializer enforces the unique_together constraint on ('invitee', 'movie_night').
         """
@@ -87,7 +88,7 @@ class TestMovieNightInvitation:
         # Assert the correct error message for the unique constraint violation
         assert "The fields invitee, movie_night must make a unique set." in str(excinfo.value)
     
-    def test_invitation_serializer_invalid_invitee(self):
+    def test_invitation_serializer_invalid_invitee(self, mock_send_invitation):
         """
         Test that the serializer raises a validation error for an invalid invitee email.
         """
@@ -111,7 +112,7 @@ class TestMovieNightInvitation:
         assert "User with email nonexistent@example.com does not exist." in str(excinfo.value)
 
 
-    def test_defaults_to_false(self):
+    def test_defaults_to_false(self, mock_send_invitation):
         """
         Test that when `attendance_confirmed` and `is_attending` are not provided,
         they default to False in the serializer.
@@ -134,7 +135,7 @@ class TestMovieNightInvitation:
         assert invitation.attendance_confirmed is False
         assert invitation.is_attending is False
 
-    def test_provided_values(self):
+    def test_provided_values(self, mock_send_invitation):
         """
         Test that when `attendance_confirmed` and `is_attending` are provided,
         they are correctly set in the serializer.

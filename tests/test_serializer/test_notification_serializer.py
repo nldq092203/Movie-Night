@@ -26,24 +26,16 @@ from django.contrib.contenttypes.models import ContentType
 from notifications.serializers import NotificationSerializer
 from movies.models import MovieNight, MovieNightInvitation
 from tests.factories import UserFactory, MovieNightFactory, MovieNightInvitationFactory, NotificationFactory
-from django.db.models.signals import post_save
-from movies.signals import send_invitation
+from unittest.mock import patch
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestNotificationSerializer:
     """
     Test cases for NotificationSerializer to ensure it serializes and deserializes 
     Notification objects correctly.
     """
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
-
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
-    def test_valid_notification_serialization(self):
+    def test_valid_notification_serialization(self, mock_send_invitation):
         """
         Test that a valid Notification object is serialized correctly.
         
@@ -75,7 +67,7 @@ class TestNotificationSerializer:
         assert data['content_object']['id'] == movie_night.id
         assert 'timestamp' in data  # Check that timestamp is present
 
-    def test_invalid_notification_type(self):
+    def test_invalid_notification_type(self, mock_send_invitation):
         """
         Test that an invalid notification_type raises a ValidationError.
     
@@ -107,7 +99,7 @@ class TestNotificationSerializer:
         # Update the assertion to match the actual error message produced by Django
         assert '"ABC" is not a valid choice.' in str(serializer.errors["notification_type"])
 
-    def test_serialize_movie_night_content_object(self):
+    def test_serialize_movie_night_content_object(self, mock_send_invitation):
         """
         Test that the content_object is serialized correctly when it's a MovieNight.
         
@@ -136,7 +128,7 @@ class TestNotificationSerializer:
         assert data["content_object"]["id"] == movie_night.id
         assert data["content_object"]["movie"] == movie_night.movie.id
 
-    def test_serialize_movie_night_invitation_content_object(self):
+    def test_serialize_movie_night_invitation_content_object(self, mock_send_invitation):
         """
         Test that the content_object is serialized correctly when it's a MovieNightInvitation.
         
@@ -166,7 +158,7 @@ class TestNotificationSerializer:
         assert data["content_object"]["id"] == movie_night_invitation.id
         assert data["content_object"]["invitee"] == movie_night_invitation.invitee.email
 
-    def test_notification_serialization_without_sender(self):
+    def test_notification_serialization_without_sender(self, mock_send_invitation):
         """
         Test that a notification can be serialized without a sender (e.g., system notifications).
         

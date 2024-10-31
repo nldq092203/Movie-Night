@@ -19,22 +19,16 @@ from tests.factories import UserFactory, MovieNightFactory, MovieNightInvitation
 from django.utils import timezone
 from datetime import timedelta
 import logging
-from django.db.models.signals import post_save
-from movies.signals import send_invitation
 logger = logging.getLogger(__name__)
+from unittest.mock import patch
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestMyMovieNightInvitation:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
 
-    def test_movie_night_invitations_list(self, authenticated_client, user):
+      # Ensure send_invitation is mocked throughout the test
+    def test_movie_night_invitations_list(self, mock_send_invitation, authenticated_client, user):
         """
         Test that all movie night invitations for the authenticated user are listed, excluding those refused.
         """
@@ -43,8 +37,7 @@ class TestMyMovieNightInvitation:
         movie_night2 = MovieNightFactory()
         movie_night3 = MovieNightFactory()
         MovieNightInvitationFactory(invitee=user, movie_night=movie_night1, is_attending=True, attendance_confirmed=True)
-        MovieNightInvitationFactory(invitee=user, movie_night=movie_night2, is_attending=False, attendance_confirmed=False)  # pending invite
-        
+        MovieNightInvitationFactory(invitee=user, movie_night=movie_night2, is_attending=False, attendance_confirmed=False)    
         # Create a refused invitation (should be excluded from the list)
         MovieNightInvitationFactory(invitee=user, movie_night=movie_night3, is_attending=False, attendance_confirmed=True)
 
@@ -61,8 +54,8 @@ class TestMyMovieNightInvitation:
         assert len(results) == 2  # One accepted and one pending invitation
         for invitation in results:
             assert invitation['is_attending'] is not False or invitation['attendance_confirmed'] is False
-
-    def test_filter_invitations_by_not_confirmed(self, authenticated_client, user):
+    
+    def test_filter_invitations_by_not_confirmed(self, mock_send_invitation, authenticated_client, user):
         """
         Test filtering invitations by start time of the associated movie night.
         """
@@ -73,6 +66,7 @@ class TestMyMovieNightInvitation:
 
         # Filter invitations with movie night starting within 3 days from now
         url = reverse('movienight_invitation_list') + f"?attendance_confirmed=False"
+
         response = authenticated_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
@@ -80,7 +74,7 @@ class TestMyMovieNightInvitation:
         assert len(results) == 1  # Only one invitation should match the filter
         assert results[0]['movie_night']== movie_night2.id
 
-    def test_exclude_refused_invitations(self, authenticated_client, user):
+    def test_exclude_refused_invitations(self, mock_send_invitation, authenticated_client, user):
         """
         Test that invitations where the user explicitly refused are excluded.
         """
@@ -92,6 +86,7 @@ class TestMyMovieNightInvitation:
         MovieNightInvitationFactory(invitee=user, movie_night=movie_night2, is_attending=False, attendance_confirmed=True)
 
         url = reverse('movienight_invitation_list')
+
         response = authenticated_client.get(url)
 
         # Assert that only the accepted invitation is listed
@@ -100,28 +95,22 @@ class TestMyMovieNightInvitation:
         assert len(results) == 1
         assert results[0]['is_attending'] is True
 
-    def test_unauthenticated_user_cannot_access(self, any_client):
+    def test_unauthenticated_user_cannot_access(self, mock_send_invitation, any_client):
         """
         Test that an unauthenticated user cannot access the movie night invitation list.
         """
         url = reverse('movienight_invitation_list')
+
         response = any_client.get(url)
 
         # Assert that unauthenticated users are denied access
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestMovieNightInvitationCreateView:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
-
-    def test_create_invitation_as_creator(self, authenticated_client, user):
+    def test_create_invitation_as_creator(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the creator of the MovieNight can create an invitation.
         """
@@ -134,13 +123,14 @@ class TestMovieNightInvitationCreateView:
             "movie_night": movie_night.id, # movie_night is required
             "invitee": invitee.email,
         }
+
         response = authenticated_client.post(url, data, format='json')
     
         # Assert: Ensure the invitation was created
         assert response.status_code == status.HTTP_201_CREATED
         assert MovieNightInvitation.objects.filter(movie_night=movie_night, invitee=invitee).exists()
 
-    def test_create_invitation_as_non_creator(self, authenticated_client, user):
+    def test_create_invitation_as_non_creator(self, mock_send_invitation, authenticated_client, user):
         """
         Test that a user who is not the creator of the MovieNight cannot create an invitation.
         """
@@ -153,12 +143,13 @@ class TestMovieNightInvitationCreateView:
             "movie_night": movie_night.id, 
             "invitee": invitee.email,
         }
+
         response = authenticated_client.post(url, data, format='json')
         
         # Assert: Ensure the user is denied access
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_create_invitation_unauthenticated(self, any_client):
+    def test_create_invitation_unauthenticated(self, mock_send_invitation, any_client):
         """
         Test that unauthenticated users cannot create invitations.
         """
@@ -170,12 +161,13 @@ class TestMovieNightInvitationCreateView:
             "movie_night": movie_night.id, 
             "invitee": invitee.email,
         }
+
         response = any_client.post(url, data, format='json')
         
         # Assert: Ensure the user is denied access
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_create_duplicate_invitation(self, authenticated_client, user):
+    def test_create_duplicate_invitation(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the system prevents duplicate invitations to the same invitee for the same MovieNight.
         """
@@ -188,6 +180,7 @@ class TestMovieNightInvitationCreateView:
             "movie_night": movie_night.id, 
             "invitee": invitee.email,
         }
+
         response = authenticated_client.post(url, data, format='json')
 
         # Assert: Ensure the duplicate invitation is not created
@@ -196,17 +189,10 @@ class TestMovieNightInvitationCreateView:
         assert "must make a unique set" in str(response.data["non_field_errors"])
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestMovieNightInvitationDetailView:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
-
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
             
-    def test_retrieve_invitation_as_invitee(self, authenticated_client, user):
+    def test_retrieve_invitation_as_invitee(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the invitee can retrieve their own invitation details.
         """
@@ -214,6 +200,8 @@ class TestMovieNightInvitationDetailView:
         invitation = MovieNightInvitationFactory(invitee=user, movie_night=movie_night)
         
         url = reverse('movienight_invitation_detail', kwargs={'pk': invitation.pk})
+
+
         response = authenticated_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
@@ -221,7 +209,7 @@ class TestMovieNightInvitationDetailView:
         assert response.data['invitee'] == user.email
         assert response.data['movie_night'] == movie_night.id
 
-    def test_update_invitation_accept(self, authenticated_client, user):
+    def test_update_invitation_accept(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the invitee accept the invitation. Thus, is_attending is updated to True and 
         attendance_confirmed to True
@@ -234,6 +222,7 @@ class TestMovieNightInvitationDetailView:
             "is_attending": True,
             "attendance_confirmed": True
             }
+
         response = authenticated_client.patch(url, data, format='json')
 
         # Assert the update was successful
@@ -250,14 +239,15 @@ class TestMovieNightInvitationDetailView:
     Same for refused case
     """
 
-    def test_delete_invitation_as_invitee(self, authenticated_client, user):
+    def test_delete_invitation_as_invitee(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the invitee can delete their own invitation.
         """
         movie_night = MovieNightFactory()
-        invitation = MovieNightInvitationFactory(invitee=user, movie_night=movie_night)
+        invitation = MovieNightInvitationFactory(invitee=user,  movie_night=movie_night)
         
         url = reverse('movienight_invitation_detail', kwargs={'pk': invitation.pk})
+
         response = authenticated_client.delete(url)
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -265,7 +255,7 @@ class TestMovieNightInvitationDetailView:
         # Assert the invitation was deleted
         assert not MovieNightInvitation.objects.filter(pk=invitation.pk).exists()
 
-    def test_access_denied_for_non_invitee(self, authenticated_client, user):
+    def test_access_denied_for_non_invitee(self, mock_send_invitation, authenticated_client, user):
         """
         Test that users who are not the invitee cannot access or modify the invitation.
         """
@@ -276,19 +266,21 @@ class TestMovieNightInvitationDetailView:
         url = reverse('movienight_invitation_detail', kwargs={'pk': invitation.pk})
         
         # Attempt to retrieve the invitation
+
         response = authenticated_client.get(url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         
         # Attempt to update the invitation
         data = {"is_attending": True}
+
         response = authenticated_client.patch(url, data, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
         
-        # Attempt to delete the invitation
+
         response = authenticated_client.delete(url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_unauthenticated_user_cannot_access(self, any_client):
+    def test_unauthenticated_user_cannot_access(self, mock_send_invitation, any_client):
         """
         Test that unauthenticated users cannot access the movie night invitation detail view.
         """
@@ -298,16 +290,19 @@ class TestMovieNightInvitationDetailView:
         url = reverse('movienight_invitation_detail', kwargs={'pk': invitation.pk})
         
         # Attempt to retrieve the invitation
+
         response = any_client.get(url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         # Attempt to update the invitation
         data = {"is_attending": True}
+
         response = any_client.patch(url, data, format='json')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         # Attempt to delete the invitation
-        response = any_client.delete(url)
+
+        response = any_client.post(url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
 """

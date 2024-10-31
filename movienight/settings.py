@@ -121,8 +121,8 @@ class Dev(Configuration):
                 'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
             }
         }
-        CELERY_TASK_ALWAYS_EAGER = os.getenv("USE_CELERY_TASK_ALWAYS_EAGER", "False") == "True"
-        CELERY_TASK_EAGER_PROPAGATES = True 
+        CELERY_TASK_ALWAYS_EAGER = True
+        CELERY_TASK_EAGER_PROPAGATES = True
     else:
         DATABASES = {
             'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))

@@ -28,8 +28,7 @@ from tests.factories import UserFactory, MovieFactory, MovieNightFactory, MovieN
 from django.utils import timezone
 from datetime import timedelta
 import logging
-from django.db.models.signals import post_save
-from movies.signals import send_invitation
+from unittest.mock import patch
 
 logger = logging.getLogger(__name__)
 @pytest.mark.django_db
@@ -97,16 +96,10 @@ class TestMyMovieNightView:
        
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestParticipatingMovieNightView:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
-    def test_participating_movie_nights(self, authenticated_client, user):
+    def test_participating_movie_nights(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the view lists movie nights where the authenticated user is either the creator or a confirmed invitee.
         """
@@ -134,7 +127,7 @@ class TestParticipatingMovieNightView:
         assert any(movie["id"] == movie_night1.id for movie in response.data)  # user is the creator
         assert any(movie["id"] == movie_night2.id for movie in response.data)  # user is a confirmed invitee
 
-    def test_participating_movie_nights_empty(self, authenticated_client):
+    def test_participating_movie_nights_empty(self, mock_send_invitation, authenticated_client):
         """
         Test that if the authenticated user is neither the creator nor an invitee, no movie nights are listed.
         """
@@ -251,17 +244,11 @@ class TestParticipatingMovieNightViewOrderingAndFiltering:
 
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestMovieNightDetailView:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
 
-    def test_movie_night_detail_view_creator(self, authenticated_client, user):
+    def test_movie_night_detail_view_creator(self, mock_send_invitation, authenticated_client, user):
         """
         Test that a creator can access the details of his own movie night
         """
@@ -277,7 +264,7 @@ class TestMovieNightDetailView:
         assert response.data['creator'] == user.email
         assert response.data['is_creator'] is True
 
-    def test_movie_night_detail_view_accepted_invitee(self, authenticated_client, user):
+    def test_movie_night_detail_view_accepted_invitee(self, mock_send_invitation, authenticated_client, user):
         """
         Test that an invited user who has accepted to attend can access the details of a movie night.
         """
@@ -305,7 +292,7 @@ class TestMovieNightDetailView:
         assert response.data['creator'] == movie_creator.email
         assert response.data['is_creator'] is False
 
-    def test_movie_night_detail_view_unconfirmed_invitee(self, authenticated_client, user):
+    def test_movie_night_detail_view_unconfirmed_invitee(self, mock_send_invitation, authenticated_client, user):
         """
         Test that an invited user who has not confirmed attendance can still access the movie night details.
         """
@@ -332,7 +319,7 @@ class TestMovieNightDetailView:
         assert response.data['id'] == movie_night.id
         assert response.data['creator'] == movie_creator.email
 
-    def test_movie_night_detail_view_unauthenticated(self, any_client):
+    def test_movie_night_detail_view_unauthenticated(self, mock_send_invitation, any_client):
         """
         Test that an unauthenticated user cannot access the movie night detail view.
         """
@@ -344,7 +331,7 @@ class TestMovieNightDetailView:
         # Assert that the response is 401 Unauthorized
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_movie_night_detail_view_no_permission(self, authenticated_client, user):
+    def test_movie_night_detail_view_no_permission(self, mock_send_invitation, authenticated_client, user):
         """
         Test that a user who is not the creator or invitee cannot access the movie night detail.
         """
@@ -357,7 +344,7 @@ class TestMovieNightDetailView:
         # Assert that the response is forbidden (403)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_movie_night_update_as_creator(self, authenticated_client, user):
+    def test_movie_night_update_as_creator(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the creator of the movie night can update it.
         """
@@ -377,7 +364,7 @@ class TestMovieNightDetailView:
         movie_night.refresh_from_db()
         assert movie_night.start_time == new_start_time
 
-    def test_movie_night_update_as_non_creator(self, authenticated_client):
+    def test_movie_night_update_as_non_creator(self, mock_send_invitation, authenticated_client):
         """
         Test that a non-creator cannot update the movie night.
         """
@@ -394,7 +381,7 @@ class TestMovieNightDetailView:
         # Assert the update is forbidden
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_movie_night_destroy_as_creator(self, authenticated_client, user):
+    def test_movie_night_destroy_as_creator(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the creator of the movie night can delete it.
         """
@@ -407,7 +394,7 @@ class TestMovieNightDetailView:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert MovieNight.objects.filter(pk=movie_night.pk).count() == 0
 
-    def test_movie_night_destroy_as_non_creator(self, authenticated_client):
+    def test_movie_night_destroy_as_non_creator(self, mock_send_invitation, authenticated_client):
         """
         Test that a non-creator cannot delete the movie night.
         """
@@ -422,17 +409,10 @@ class TestMovieNightDetailView:
         assert MovieNight.objects.filter(pk=movie_night.pk).count() == 1
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestInvitedMovieNightView:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
-
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
             
-    def test_list_invited_movie_nights(self, authenticated_client, user):
+    def test_list_invited_movie_nights(self, mock_send_invitation, authenticated_client, user):
         """
         Test that the authenticated user can list movie nights they have been invited to.
         """
@@ -458,7 +438,7 @@ class TestInvitedMovieNightView:
         assert movie_night2.id in movie_night_ids
         assert movie_night3.id not in movie_night_ids
 
-    def test_invited_movie_nights_empty(self, authenticated_client, user):
+    def test_invited_movie_nights_empty(self, mock_send_invitation, authenticated_client, user):
         """
         Test that if the authenticated user has no invitations, an empty list is returned.
         """
@@ -472,7 +452,7 @@ class TestInvitedMovieNightView:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 0
 
-    def test_invited_movie_nights_filter_by_start_time(self, authenticated_client, user):
+    def test_invited_movie_nights_filter_by_start_time(self, mock_send_invitation, authenticated_client, user):
         """
         Test filtering invited movie nights by start time.
         """
@@ -496,7 +476,7 @@ class TestInvitedMovieNightView:
         assert len(results) == 1  # Only one movie night should match the filter
         assert results[0]['id'] == movie_night1.id
 
-    def test_unauthenticated_user_cannot_access(self, any_client):
+    def test_unauthenticated_user_cannot_access(self, mock_send_invitation, any_client):
         """
         Test that an unauthenticated user cannot access the invited movie nights list.
         """

@@ -7,8 +7,8 @@ from movies.serializers import MovieNightSerializer, MovieNightDetailSerializer
 from tests.factories import UserFactory, MovieFactory, MovieNightInvitationFactory, MovieNightFactory
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models.signals import post_save
-from movies.signals import send_invitation
+from unittest.mock import patch
+
 @pytest.mark.django_db
 class TestMovieNightSerializer:
     def test_movie_night_serializer_serialization(self):
@@ -94,16 +94,10 @@ class TestMovieNightSerializer:
         assert "Start time must be in the future." in serializer.errors["start_time"]  # Customize this error message as per your implementation
 
 @pytest.mark.django_db
+@patch('movies.tasks.send_invitation.delay')
 class TestMovieNightDetailSerializer:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        # self.invitation = MovieNightInvitationFactory()
-        post_save.disconnect(send_invitation, sender=MovieNightInvitation)
 
-    def tearDown(self):
-        # Reconnect the signal after tests
-        post_save.connect(send_invitation, sender=MovieNightInvitation)
-    def test_movie_night_detail_serializer_serialization(self):
+    def test_movie_night_detail_serializer_serialization(self, mock_send_invitation):
         """
         Test that MovieNightSerializer correctly serializes a MovieNight instance,
         including the creator, participants, and pending invitees.
@@ -146,7 +140,7 @@ class TestMovieNightDetailSerializer:
         assert len(data["participants"]) == 1
         assert len(data["pending_invitees"]) == 0  # Since no request context is passed, pending invitees will be empty
 
-    def test_movie_night_detail_serializer_deserialization(self, user):
+    def test_movie_night_detail_serializer_deserialization(self,mock_send_invitation, user):
         """
         Test that MovieNightSerializer correctly deserializes input data and creates a MovieNight instance.
         """
@@ -170,7 +164,7 @@ class TestMovieNightDetailSerializer:
         assert movie_night.creator == user
         assert movie_night.start_notification_sent is False
 
-    def test_movie_night_detail_serializer_with_pending_invitees(self, mocker):
+    def test_movie_night_detail_serializer_with_pending_invitees(self, mock_send_invitation, mocker):
         """
         Test that MovieNightSerializer correctly returns pending invitees only if the requester is the creator.
         """
@@ -197,7 +191,7 @@ class TestMovieNightDetailSerializer:
         assert len(data["pending_invitees"]) == 1
         assert data["pending_invitees"][0] == "invitee2@example.com"
 
-    def test_movie_night_detail_serializer_pending_invitees_non_creator(self, mocker):
+    def test_movie_night_detail_serializer_pending_invitees_non_creator(self, mock_send_invitation,  mocker):
         """
         Test that pending invitees are not returned when the user is not the creator.
         """
