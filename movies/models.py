@@ -9,7 +9,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 from datetime import timedelta
 from notifications.models import Notification
-
+from django.contrib.contenttypes.models import ContentType
 UserModel = get_user_model()
 
 
@@ -119,7 +119,9 @@ class MovieNight(models.Model):
         Returns a string representation of the movie night, including the movie and creator's email.
         """
         return f"{self.movie} by {self.creator.email}"
-
+    def delete(self, *args, **kwargs):
+        Notification.objects.filter(content_type=ContentType.objects.get_for_model(self), object_id=self.id).update(content_type=None, object_id=None)
+        super().delete(*args, **kwargs)
 
 class MovieNightInvitation(models.Model):
     """
