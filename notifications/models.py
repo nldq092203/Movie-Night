@@ -22,7 +22,7 @@ class Notification(models.Model):
     sender = models.ForeignKey(UserModel, null=True, blank=True, on_delete=models.SET_NULL, related_name="sent_notifications")
     notification_type = models.CharField(max_length=3, choices=NOTIFICATION_TYPES, db_index=True)  # Indexed for fast lookups
     is_read = models.BooleanField(default=False, db_index=True)  # Indexed for filtering unread notifications
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')  # Links notification to any model
     message = models.TextField(blank=True)
