@@ -16,7 +16,6 @@ def schedule_setup(sender, **kwargs):
         period=IntervalSchedule.MINUTES, every=1
     )
     # Create or get the periodic task linked to this schedule
-    # Create or get the periodic task linked to this schedule
     task, created = PeriodicTask.objects.get_or_create(
         name="Check movie start times every minute",
         interval=minute_schedule,
