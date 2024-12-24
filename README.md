@@ -38,6 +38,7 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 - Visit [Movie-Night-UI](https://github.com/nldq092203/Movie-Night-UI.git) to access Frontend project.
 
 ## Features
+
 🔐 User Authentication and Authorization
 
 	•	JWT Authentication: Secure login and registration with JSON Web Tokens (JWT) for session management.
@@ -107,7 +108,7 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 - **Database**: PostgreSQL (SQLite for test)
 - **Cloud Storage**: Firebase
 - **External APIs**: OMDb API
-- **Documentation**: Swagger/OpenAPI
+- **Documentation**: Swagger/OpenAPI 
 - **Containerization**: Docker, Docker Compose
 - **TypeScript**: For shared data structures and contracts
 
@@ -199,9 +200,8 @@ docker-compose down
 
 ### API Documentation
 
-The API is documented using Swagger/OpenAPI.
-Swagger UI: 
-Accessible at `http://localhost:8000/api/schema/swagger-ui`.
+The API is documented using Swagger/OpenAPI: [Swagger UI](https://web-production-5212b.up.railway.app/api/schema/swagger-ui/)
+
 
 #### Generating API Schema
 
