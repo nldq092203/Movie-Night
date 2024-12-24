@@ -3,7 +3,10 @@
 ***Movie Night Together*** is a full-stack web application designed as a social platform to simplify organizing movie night events. With Movie Night Together, users can effortlessly search for movies, create and manage events, invite friends, receive notifications, and chat individually or in groups—all within an intuitive and user-friendly interface.
 
 ## Demo Video
-https://github.com/nldq092203/Movie-Night.git/Demo.mp4
+
+https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
+
+
 
 ## Table of Contents
 
