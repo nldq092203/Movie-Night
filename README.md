@@ -1,4 +1,25 @@
 # Movie Night Together 
+![Django](https://img.shields.io/badge/django-4.2.16-blue)
+![Django REST Framework](https://img.shields.io/badge/django%20rest%20framework-3.15.2-blueviolet)
+![Redis](https://img.shields.io/badge/redis-5.0.8-red)
+![PostgreSQL](https://img.shields.io/badge/postgresql-15.3-lightgreen)
+![SQLite](https://img.shields.io/badge/sqlite-3.42.0-lightgrey)
+![Pytest](https://img.shields.io/badge/pytest-8.3.3-yellowgreen)
+![Celery](https://img.shields.io/badge/celery-5.4.0-darkgreen)
+![Firebase](https://img.shields.io/badge/firebase-6.5.0-yellow)
+![Swagger](https://img.shields.io/badge/swagger-3.52.5-orange)
+![React](https://img.shields.io/badge/react-18.2.0-lightblue)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-3.3.1-cyan)
+![Ably](https://img.shields.io/badge/ably-2.0.6-blue)
+![Axios](https://img.shields.io/badge/axios-1.5.2-purple)
+![OMDb API](https://img.shields.io/badge/omdb%20api-1.0.0-darkblue)
+![TypeScript](https://img.shields.io/badge/typescript-5.2.2-lightblue)
+![GitHub Actions](https://img.shields.io/badge/github%20actions-2.0.0-darkblue)
+![Google Cloud Run](https://img.shields.io/badge/google%20cloud%20run-1.3.0-lightgrey)
+![Vite](https://img.shields.io/badge/vite-4.4.3-blueviolet)
+![Postman](https://img.shields.io/badge/postman-10.17.0-orange)
+![Docker](https://img.shields.io/badge/docker-27.3.1-green)
+![Docker Compose](https://img.shields.io/badge/docker%20compose-2.17.3-green)
 
 ***Movie Night Together*** is a full-stack web application designed as a social platform to simplify organizing movie night events. With Movie Night Together, users can effortlessly search for movies, create and manage events, invite friends, receive notifications, and chat individually or in groups—all within an intuitive and user-friendly interface.
 
