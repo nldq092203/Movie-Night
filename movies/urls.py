@@ -17,13 +17,15 @@ from movies.views import (
     MyMovieNightForAMovieView
 )
 
+from django.views.decorators.cache import cache_page
+
 urlpatterns = [
     path("movies/search/", MovieSearchView.as_view(), name="movie_search"),
     path("movies/search-wait/<uuid:result_uuid>/", MovieSearchWaitView.as_view(), name="movie_search_wait"),
     path("movies/search-results/", MovieSearchResultsView.as_view(), name="movie_search_results"),
     path("movies/<str:pk>/my-movie-nights/", MyMovieNightForAMovieView.as_view(), name="my_movienight"),
     path("movies/<str:pk>/", MovieDetailView.as_view(), name="movie_detail"),
-    path("movies/", MovieView.as_view(), name="movie_list"),
+    path("movies/", cache_page(60*5)(MovieView.as_view()), name="movie_list"),
     path("my-movie-nights/", MyMovieNightView.as_view(), name="my_movienight_list"),
     path("participating-movie-nights/", ParticipatingMovieNightView.as_view(), name="movienight_list"),
     path("movie-nights/invited/", InvitedMovieNightView.as_view(), name="invited_movienight_list"),

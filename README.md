@@ -104,9 +104,15 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 
 	•	Enhanced Data Navigation: Filter and sort data across movies, events, notifications, chat groups, and messages for a tailored user experience.
 
-📊 API Throttling and Pagination
+📊 API Throttling, Pagination, and Caching
 
 	•	Efficient Data Handling: Control API usage and retrieve data in paginated results to optimize load times and performance.
+	•	Redis Cache Integration: Frequently accessed data like movie and search results are cached to improve response times and reduce database load.
+
+🛠 Performance Monitoring with Django Debug Tool
+
+	•	Detailed analysis of database queries and cache performance.
+	•	Helps identify and resolve bottlenecks, ensuring optimal application efficiency.
 
 🌍 CORS Support
 
@@ -126,6 +132,8 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 - **Authentication**: Djoser, JWT, Google OAuth2
 - **Web Socket**: Ably (third party)
 - **Asynchronous and Scheduled Tasks**: Celery, Redis
+- **In-memory caching**: Redis
+- **Performance Monitoring**: Django Debug Tool 
 - **Database**: PostgreSQL (SQLite for test)
 - **Cloud Storage**: Firebase
 - **External APIs**: OMDb API

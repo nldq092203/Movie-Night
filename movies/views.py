@@ -30,6 +30,7 @@ from movies.tasks import search_and_save
 from movies.omdb_integration import fill_movie_details
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import PageNumberPagination
+from django.core.paginator import Paginator
 from rest_framework import status
 
 from movies.filters import (
@@ -52,6 +53,8 @@ from celery.result import AsyncResult
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 import logging
+from django.core.cache import cache
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
@@ -181,21 +184,12 @@ class MovieSearchWaitView(APIView):
             + urllib.parse.quote_plus(term)
         )
     
-class MovieSearchResultsView(ListAPIView):
+class MovieSearchResultsView(APIView):
     """
     API view to return paginated search results based on the search term.
     """
-    serializer_class = MovieSerializer
-    pagination_class = PageNumberPagination
     permission_classes = [AllowAny]
-    authentication_classes = [] 
-    queryset = Movie.objects.all()  # Define a default queryset
-
-    def get_queryset(self):
-        if getattr(self, 'swagger_fake_view', False):
-            return Movie.objects.none()
-        term = self.request.query_params.get("search_term", "").strip()
-        return Movie.objects.filter(title__icontains=term).only('imdb_id', 'title', 'year', 'url_poster')
+    authentication_classes = []
 
     @extend_schema(
         parameters=[
@@ -205,33 +199,40 @@ class MovieSearchResultsView(ListAPIView):
         description="Return paginated search results based on the search term.",
     )
     def get(self, request, *args, **kwargs):
+        # Retrieve and validate the search term
         term = request.query_params.get("search_term", "").strip()
         if not term:
             return Response(
                 {"error": "Search term is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        movie_list = Movie.objects.filter(title__icontains=term).only('id', 'imdb_id', 'title', 'year', 'url_poster').order_by('-year')
 
-        # Check if there are any results
-        if not movie_list:
+        # Check the cache
+        cache_key = f"search_results:{term}"
+        cached_results = cache.get(cache_key)
+        if cached_results:
+            return Response(cached_results)
+
+        # Fetch results from the database
+        results = Movie.objects.filter(title__icontains=term)
+        serialized_results = MovieSerializer(results, many=True).data
+
+        # Cache the results for 1 hour
+        cache.set(cache_key, serialized_results, timeout=3600)
+
+        # Handle no results
+        if not serialized_results:
             return Response(
-                {
-                    "results": [],
-                    "message": "No movies found matching your search term."
-                },
+                {"results": [], "message": "No movies found matching your search term."},
                 status=status.HTTP_200_OK,
             )
 
-        # Use the default pagination
-        page = self.paginate_queryset(movie_list)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        # Paginate serialized results
+        paginator = PageNumberPagination()
+        paginated_results = paginator.paginate_queryset(serialized_results, request, view=self)
 
-        serializer = self.get_serializer(movie_list, many=True)
-        return Response(serializer.data)
-    
+        return paginator.get_paginated_response(paginated_results)
+        
 class MovieDetailView(RetrieveAPIView):
     """
     Retrieve and update detailed information for a single movie.
@@ -268,6 +269,29 @@ class MovieDetailView(RetrieveAPIView):
         return Response(serializer.data)
     
 
+
+
+class CustomPaginator(Paginator):
+    @property
+    def count(self):
+        """
+        Override the count property to cache the result of COUNT(*).
+        If no cached value exists, it falls back to the default behavior and caches the result.
+        """
+        cache_key = "movies_total_count"
+        total_count = cache.get(cache_key)
+        
+        if total_count is None:
+            # Call the original count logic from the default paginator
+            total_count = super().count  # This triggers the COUNT(*) query
+
+            cache.set(cache_key, total_count,timeout=60*20)  
+        
+        return total_count
+
+class CustomPageNumberPagination(PageNumberPagination):
+    django_paginator_class = CustomPaginator
+
 class MovieView(ListAPIView):
     """
     A list view to filter movies based on criteria such as genres, country, year, and runtime.
@@ -284,6 +308,7 @@ class MovieView(ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = [] 
     serializer_class = MovieSerializer
+    pagination_class = CustomPageNumberPagination
 
 
 ############ MovieNight ##############

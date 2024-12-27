@@ -115,17 +115,46 @@ class OmdbClient:
 
         while True:
             logger.info("Fetching page %d", page)
-            resp = self.make_request({"s": search, "type": "movie", "page": str(page)})
-            resp_body = resp.json()
-            if total_results is None:
-                total_results = int(resp_body["totalResults"])
 
-            for movie in resp_body["Search"]:
-                seen_results += 1
-                yield OmdbMovie(movie)
+            try:
+                # Make the API request
+                resp = self.make_request({"s": search, "type": "movie", "page": str(page)})
+                resp_body = resp.json()
 
-            if seen_results >= total_results:
+                # Log the response for debugging
+                logger.debug("API Response: %s", resp_body)
+
+                # Handle error responses
+                if resp_body.get("Response") == "False":
+                    logger.error("OMDB API returned an error: %s", resp_body.get("Error", "Unknown error"))
+                    break
+
+                # Safely retrieve 'totalResults' the first time
+                if total_results is None:
+                    try:
+                        total_results = int(resp_body.get("totalResults", 0))
+                    except ValueError:
+                        logger.error("Invalid 'totalResults' value in response: %s", resp_body)
+                        break
+
+                # Safely retrieve and iterate over 'Search'
+                search_results = resp_body.get("Search", [])
+                if not search_results:
+                    logger.warning("No 'Search' results found in the response: %s", resp_body)
+                    break
+
+                for movie in search_results:
+                    seen_results += 1
+                    yield OmdbMovie(movie)
+
+                # Stop when all results are fetched
+                if seen_results >= total_results:
+                    logger.info("All results fetched: %d/%d", seen_results, total_results)
+                    break
+
+                page += 1
+
+            except Exception as e:
+                logger.exception("An error occurred during the search: %s", str(e))
                 break
-
-            page += 1
 

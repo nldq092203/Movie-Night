@@ -43,6 +43,7 @@ class Dev(Configuration):
         'web-production-5212b.up.railway.app', 
         'localhost',
         '127.0.0.1',
+        '0.0.0.0'
     ]
     CSRF_TRUSTED_ORIGINS = [
         'https://web-production-5212b.up.railway.app', 
@@ -70,14 +71,17 @@ class Dev(Configuration):
         'movienight_auth',  # Contains custom user model
         "django_celery_results",
         "django_celery_beat",
+        'django_filters',
 
         # Other custom apps
         'movies',
         "notifications",
         "chat",
-        "movienight_profile"
+        "movienight_profile",
+        "debug_toolbar"
     ] 
     MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'corsheaders.middleware.CorsMiddleware',
@@ -110,9 +114,37 @@ class Dev(Configuration):
     WSGI_APPLICATION = 'movienight.wsgi.application'
 
 
-    # Database
-    # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+    # Database configuration
+    # DATABASES = {}
 
+    # if os.getenv('USE_SQLITE_FOR_TESTS') == 'True' or 'pytest' in sys.argv:
+    #     # Use SQLite for tests
+    #     DATABASES = {
+    #         'default': {
+    #             'ENGINE': 'django.db.backends.sqlite3',
+    #             'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
+    #         }
+    #     }
+    #     CELERY_TASK_ALWAYS_EAGER = True
+    #     CELERY_TASK_EAGER_PROPAGATES = True
+    # elif os.getenv('DATABASE_URL'):
+    #     # Use DATABASE_URL for development/production
+    #     DATABASES = {
+    #         'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    #     }
+    # else:
+    #     # Fallback to a hardcoded development database
+    #     DATABASES = {
+    #         'default': {
+    #             'ENGINE': 'django.db.backends.postgresql',
+    #             'NAME': 'dev_db',
+    #             'USER': 'dev_user',
+    #             'PASSWORD': 'dev_password',
+    #             'HOST': 'db',
+    #             'PORT': '5432',
+    #         }
+    #     }
+    # # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
     # Database configuration
     if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
         DATABASES = {
@@ -127,8 +159,6 @@ class Dev(Configuration):
         DATABASES = {
             'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
         }
-    # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
-
     # Password validation
     # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -258,11 +288,15 @@ class Dev(Configuration):
     }
     BASE_URL =  os.getenv('BASE_URL') 
 
+    # CELERY_BROKER_URL = 'redis://redis:6379/0'  # Directly connect to Redis via Docker network
+    # CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
     # CELERY 
     CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
     # CELERY_BROKER_URL = "redis://localhost:6379/0"
     CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
     CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_RESULT_SERIALIZER = 'json'
@@ -292,6 +326,27 @@ class Dev(Configuration):
 
     OMDB_KEY = os.getenv('OMDB_KEY', "e1406b6f")
 
+    CACHE_TTL = 60 * 60
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+            "TIMEOUT": CACHE_TTL
+        }        
+    }
+
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+
+    import os
+    import socket
+
+    # Dynamically configure INTERNAL_IPS for Django Debug Toolbar
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = ['127.0.0.1', '::1'] + [ip[: ip.rfind('.') + 1] + '1' for ip in ips]
 
 class Prod(Dev):
     DEBUG = False
