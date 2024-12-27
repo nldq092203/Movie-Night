@@ -201,37 +201,31 @@ class MovieSearchResultsView(APIView):
     def get(self, request, *args, **kwargs):
         # Retrieve and validate the search term
         term = request.query_params.get("search_term", "").strip()
+        page = request.query_params.get("page", 1)
+
         if not term:
             return Response(
                 {"error": "Search term is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Check the cache
-        cache_key = f"search_results:{term}"
+        # Generate a cache key for the search term and page
+        cache_key = f"search_results:{term}:page:{page}"
         cached_results = cache.get(cache_key)
         if cached_results:
             return Response(cached_results)
 
         # Fetch results from the database
         results = Movie.objects.filter(title__icontains=term)
-        serialized_results = MovieSerializer(results, many=True).data
-
-        # Cache the results for 1 hour
-        cache.set(cache_key, serialized_results, timeout=3600)
-
-        # Handle no results
-        if not serialized_results:
-            return Response(
-                {"results": [], "message": "No movies found matching your search term."},
-                status=status.HTTP_200_OK,
-            )
-
-        # Paginate serialized results
         paginator = PageNumberPagination()
-        paginated_results = paginator.paginate_queryset(serialized_results, request, view=self)
+        paginated_results = paginator.paginate_queryset(results, request, view=self)
 
-        return paginator.get_paginated_response(paginated_results)
+        # Serialize and cache paginated results for the specific page
+        serialized_results = MovieSerializer(paginated_results, many=True).data
+        paginated_response = paginator.get_paginated_response(serialized_results).data
+
+        cache.set(cache_key, paginated_response, timeout=3600)
+        return Response(paginated_response)
         
 class MovieDetailView(RetrieveAPIView):
     """
