@@ -182,7 +182,7 @@ The project includes a centralized script, run.sh, located in the infrastructure
 #### Clone the Repository
 ##### Backend Repo
 ```bash
-https://github.com/nldq092203/Movie-Night.git
+git clone https://github.com/nldq092203/Movie-Night.git
 cd Movie-Night
 
 ```
