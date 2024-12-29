@@ -144,21 +144,7 @@ class Dev(Configuration):
                 'PORT': '5432',
             }
         }
-    # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
-    # Database configuration
-    # if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
-    #     DATABASES = {
-    #         'default': {
-    #             'ENGINE': 'django.db.backends.sqlite3',
-    #             'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
-    #         }
-    #     }
-    #     CELERY_TASK_ALWAYS_EAGER = True
-    #     CELERY_TASK_EAGER_PROPAGATES = True
-    # else:
-    #     DATABASES = {
-    #         'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-    #     }
+
     # Password validation
     # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -291,16 +277,6 @@ class Dev(Configuration):
     CELERY_BROKER_URL = 'redis://redis:6379/0'  # Directly connect to Redis via Docker network
     CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
-    # # CELERY 
-    # CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
-    # # CELERY_BROKER_URL = "redis://localhost:6379/0"
-    # CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-    # CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-
-    # CELERY_ACCEPT_CONTENT = ['json']
-    # CELERY_TASK_SERIALIZER = 'json'
-    # CELERY_RESULT_SERIALIZER = 'json'
-
 
     # ABLY
     ABLY_API_KEY = os.getenv('ABLY_API_KEY')
@@ -350,14 +326,30 @@ class Dev(Configuration):
 
 
 class Prod(Dev):
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     DEBUG = False
-    # SECRET_KEY = values.SecretValue()
-    # DATABASES = {
-    #     'default': values.DatabaseURLValue(
-    #         default=f"postgres://{os.getenv('DB_USER', 'default')}:"
-    #                 f"{os.getenv('DB_PASSWORD', 'default')}@"
-    #                 f"{os.getenv('DB_HOST', 'default')}:"
-    #                 f"{os.getenv('DB_PORT', 'default')}/"
-    #                 f"{os.getenv('DB_NAME', 'default')}"
-    #     )
-    # }
+    # SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+    DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
+    #Database configuration
+    if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
+            }
+        }
+        CELERY_TASK_ALWAYS_EAGER = True
+        CELERY_TASK_EAGER_PROPAGATES = True
+    else:
+        DATABASES = {
+            'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+        }
+
+    # CELERY 
+    CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
+    CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+    CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_RESULT_SERIALIZER = 'json'
