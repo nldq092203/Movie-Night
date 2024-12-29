@@ -68,16 +68,16 @@ class Dev(Configuration):
         'rest_framework_simplejwt',
         'drf_spectacular',
         'djoser',
-        'movienight_auth',  # Contains custom user model
+        'apps.movienight_auth',  # Contains custom user model
         "django_celery_results",
         "django_celery_beat",
         'django_filters',
 
         # Other custom apps
-        'movies',
-        "notifications",
-        "chat",
-        "movienight_profile",
+        'apps.movies',
+        "apps.notifications",
+        "apps.chat",
+        "apps.movienight_profile",
         "debug_toolbar"
     ] 
     MIDDLEWARE = [
@@ -115,50 +115,36 @@ class Dev(Configuration):
 
 
     # Database configuration
-    # DATABASES = {}
+    DATABASES = {}
 
-    # if os.getenv('USE_SQLITE_FOR_TESTS') == 'True' or 'pytest' in sys.argv:
-    #     # Use SQLite for tests
-    #     DATABASES = {
-    #         'default': {
-    #             'ENGINE': 'django.db.backends.sqlite3',
-    #             'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
-    #         }
-    #     }
-    #     CELERY_TASK_ALWAYS_EAGER = True
-    #     CELERY_TASK_EAGER_PROPAGATES = True
-    # elif os.getenv('DATABASE_URL'):
-    #     # Use DATABASE_URL for development/production
-    #     DATABASES = {
-    #         'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-    #     }
-    # else:
-    #     # Fallback to a hardcoded development database
-    #     DATABASES = {
-    #         'default': {
-    #             'ENGINE': 'django.db.backends.postgresql',
-    #             'NAME': 'dev_db',
-    #             'USER': 'dev_user',
-    #             'PASSWORD': 'dev_password',
-    #             'HOST': 'db',
-    #             'PORT': '5432',
-    #         }
-    #     }
-    # # DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
-    # Database configuration
-    if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
+    if os.getenv('USE_SQLITE_FOR_TESTS') == 'True' or 'pytest' in sys.argv:
+        # Use SQLite for tests
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
+                'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
             }
         }
         CELERY_TASK_ALWAYS_EAGER = True
         CELERY_TASK_EAGER_PROPAGATES = True
-    else:
+    elif os.getenv('DATABASE_URL'):
+        # Use DATABASE_URL for development/production
         DATABASES = {
             'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
         }
+    else:
+        # Fallback to a hardcoded development database
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'dev_db',
+                'USER': 'dev_user',
+                'PASSWORD': 'dev_password',
+                'HOST': 'db',
+                'PORT': '5432',
+            }
+        }
+
     # Password validation
     # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -288,18 +274,8 @@ class Dev(Configuration):
     }
     BASE_URL =  os.getenv('BASE_URL') 
 
-    # CELERY_BROKER_URL = 'redis://redis:6379/0'  # Directly connect to Redis via Docker network
-    # CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-
-    # CELERY 
-    CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
-    # CELERY_BROKER_URL = "redis://localhost:6379/0"
-    CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-    CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-
-    CELERY_ACCEPT_CONTENT = ['json']
-    CELERY_TASK_SERIALIZER = 'json'
-    CELERY_RESULT_SERIALIZER = 'json'
+    CELERY_BROKER_URL = 'redis://redis:6379/0'  # Directly connect to Redis via Docker network
+    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 
     # ABLY
@@ -348,15 +324,32 @@ class Dev(Configuration):
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = ['127.0.0.1', '::1'] + [ip[: ip.rfind('.') + 1] + '1' for ip in ips]
 
+
 class Prod(Dev):
-    DEBUG = False
-    # SECRET_KEY = values.SecretValue()
-    # DATABASES = {
-    #     'default': values.DatabaseURLValue(
-    #         default=f"postgres://{os.getenv('DB_USER', 'default')}:"
-    #                 f"{os.getenv('DB_PASSWORD', 'default')}@"
-    #                 f"{os.getenv('DB_HOST', 'default')}:"
-    #                 f"{os.getenv('DB_PORT', 'default')}/"
-    #                 f"{os.getenv('DB_NAME', 'default')}"
-    #     )
-    # }
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DEBUG = values.BooleanValue(False)
+    # SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+    DATABASES = values.DatabaseURLValue(f"sqlite:///{BASE_DIR}/db.sqlite3")
+    #Database configuration
+    if 'pytest' in sys.argv or os.getenv('USE_SQLITE_FOR_TESTS') == 'True':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),  
+            }
+        }
+        CELERY_TASK_ALWAYS_EAGER = True
+        CELERY_TASK_EAGER_PROPAGATES = True
+    else:
+        DATABASES = {
+            'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+        }
+
+    # CELERY 
+    CELERY_RESULT_BACKEND = "django-db" # Store the results of tasks in the Django database
+    CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+    CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_RESULT_SERIALIZER = 'json'
