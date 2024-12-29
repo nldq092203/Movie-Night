@@ -20,6 +20,8 @@
 ![Postman](https://img.shields.io/badge/postman-10.17.0-orange)
 ![Docker](https://img.shields.io/badge/docker-27.3.1-green)
 ![Docker Compose](https://img.shields.io/badge/docker%20compose-2.17.3-green)
+![NGINX](https://img.shields.io/badge/nginx-1.25.0-darkgreen)
+![HTTPS/TLS](https://img.shields.io/badge/tls-secure-orange)
 
 ***Movie Night Together*** is a full-stack web application designed as a social platform to simplify organizing movie night events. With Movie Night Together, users can effortlessly search for movies, create and manage events, invite friends, receive notifications, and chat individually or in groups—all within an intuitive and user-friendly interface.
 
@@ -35,22 +37,23 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 - [Tech Stack](#tech-stack)
   - [Backend](#backend)
   - [Frontend](#frontend)
+  - [Infrastructure](#infrastructure)
   - [CI/CD](#ci/cd)
 - [Accessibility](#accessibility)
 - [Database UML Diagram](#database-uml-diagram)
+- [HTTPS Configuration Schema](#https-configuration-schema)
+- [Project Development Architecture](#project-development-architecture)
 - [Development](#development)
-  - [Installation and Usage](#installation-and-usage)
-    - [Prerequisites](#prerequisites)
+  - [Centralized Scripts: Installation and Usage Guide](#installation-and-usage)
     - [Clone the Repository](#clone-the-repository)
-    - [Environment Variables](#environment-variables)
-    - [Docker Setup](#docker-setup)
-
+	- [Usage Guide](#usage-guide)
   - [API Documentation](#api-documentation)
   - [Testing](#testing)
     - [Running Tests](#running-tests)
     - [Testing Tools](#testing-tools)
     - [Testing Components](#testing-components)
     - [Mocking External Services](#mocking-external-services)
+
 - [Contact](#contact)
 
 ## Accessibility
@@ -135,6 +138,7 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 - **In-memory caching**: Redis
 - **Performance Monitoring**: Django Debug Tool 
 - **Database**: PostgreSQL (SQLite for test)
+- **Testing**: Pytest, Factory Boy, APIClient, Postman
 - **Cloud Storage**: Firebase
 - **External APIs**: OMDb API
 - **Documentation**: Swagger/OpenAPI 
@@ -149,22 +153,31 @@ https://github.com/user-attachments/assets/8008ab6c-32e1-408b-ac73-dc68ba332a6d
 - **HTTP Client**: Axios
 - **Build Tool**: Vite
 
+### Infrastructure
+
+- **NGINX Reverse Proxy**: Secure and efficient request management.
+- **HTTPS/TLS Certificates**: Self-signed for development; production-ready for deployment.
+- **Containerization**: Docker, Docker Compose
+
 ### CI/CD
 - **Source Control**: GitHub
 - **CI/CD Pipeline**: Github Action
-- **Build Tools**: Docker
-- **Testing**: Pytest, Factory Boy, APIClient, Postman
 - **Deployment**: Google Cloud Run, Railway
 ## Database UML Diagram
 Below is the database UML diagram illustrating the data structure:
-![Database UML Diagram](./movienight-uml.drawio.png)
+![Database UML Diagram](./staticfiles/movienight-uml.drawio.png)
+
+## HTTPS Configuration Schema
+Below is a detailed schema illustrating how HTTPS is configured using NGINX as a reverse proxy in the project, including TLS encryption and HTTP to HTTPS redirection:
+![HTTPS Configuration Schema](./staticfiles/https_configuration_schema.png)
+
+## Project Development Architecture
+Below is a comprehensive schema showcasing the overall development architecture of the project, highlighting the integration of NGINX reverse proxy, Celery, Redis, PostgreSQL, and the Django backend within a Docker Compose:
+![Project Development Architecture](./staticfiles/project_development_architecture.png)
 
 ## Development
 ### Installation and Usage
-
-#### Prerequisites
-
-- Docker & Docker Compose: Ensure both are installed on your system.
+The project includes a centralized script, run.sh, located in the infrastructure/scripts/ directory. This script simplifies the setup and management of the development environment.
 
 #### Clone the Repository
 ##### Backend Repo
@@ -179,53 +192,44 @@ cd Movie-Night
 git clone https://github.com/nldq092203/Movie-Night-UI.git
 cd Movie-Night-UI
 ```
-
-#### Environment Variables
-```bash
-# Django settings
-SECRET_KEY=your_secret_key
-
-# Database settings
-DATABASE_URL=your_database_url
-
-# Redis settings
-REDIS_URL=your_redis_url
-
-# External API keys
-OMDB_KEY=your_omdb_api_key
-SOCIAL_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CLIENT_ID=your_google_client_id
-ABLY_API_KEY=your_ably_api_key
-FIREBASE_ADMINSDK_KEY=your_firebase_key
+#### Usage Guide
+##### View All Commands
+To view all available commands for the centralized run.sh script, run:
+``` bash
+./infrastructure/scripts/run.sh help
 ```
 
-#### Docker Setup
-
-##### 1. Build and Start Containers:
-
-```bash
-docker-compose up --build
-
+##### Start the Development Environment
+``` bash
+./infrastructure/scripts/run.sh dev
 ```
 
-##### 2.Run Database Migrations (Optional)
-
-```bash
-docker-compose exec web python manage.py migrate
-
+##### Generate TLS Certificates
+``` bash
+./infrastructure/scripts/run.sh create-tls-certs
 ```
 
-##### 3. Create a Superuser:
-
-```bash
-docker-compose exec web python manage.py createsuperuser
+##### Add TLS Certificates to Trusted Store
+Ensure that the self-signed certificate is recognized as valid by your system, eliminating browser security warnings for HTTPS connections
+``` bash
+./infrastructure/scripts/run.sh add-trusted-cert
 ```
 
-##### 4. Stop the application
-```bash
-docker-compose down
+##### View Logs for a Specific Service
+``` bash
+./infrastructure/scripts/run.sh logs
 ```
 
+##### Execute Commands in a Service
+Run a shell command in a specific container (e.g., web):
+``` bash
+./infrastructure/scripts/run.sh exec
+```
+
+For more detailed commands and options, refer to the script itself
+``` bash
+cat ./infrastructure/scripts/run.sh
+```
 
 ### API Documentation
 
@@ -235,7 +239,7 @@ The API is documented using Swagger/OpenAPI: [Swagger UI](https://web-production
 #### Generating API Schema
 
 ```bash
-python manage.py spectacular --file schema.yaml
+python3 manage.py spectacular --file schema.yaml
 
 ```
 
@@ -249,9 +253,16 @@ npx openapi-typescript schema.yaml --output types.ts
 ### Testing
 
 #### Running Tests
+To run the tests for your Django project within the Docker container, follow these steps:
 
+1. Choose the web service when prompted.
+2. Use the following command to start the process:
 ```bash
-docker-compose exec web pytest
+./infrastructure/scripts/run.sh exec
+```
+After running the command, select the web service by entering its corresponding number and proceed to execute:
+```bash
+pytest
 ```
 
 #### Testing Tools
