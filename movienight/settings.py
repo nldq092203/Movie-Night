@@ -68,16 +68,16 @@ class Dev(Configuration):
         'rest_framework_simplejwt',
         'drf_spectacular',
         'djoser',
-        'movienight_auth',  # Contains custom user model
+        'apps.movienight_auth',  # Contains custom user model
         "django_celery_results",
         "django_celery_beat",
         'django_filters',
 
         # Other custom apps
-        'movies',
-        "notifications",
-        "chat",
-        "movienight_profile",
+        'apps.movies',
+        "apps.notifications",
+        "apps.chat",
+        "apps.movienight_profile",
         "debug_toolbar"
     ] 
     MIDDLEWARE = [
@@ -330,7 +330,7 @@ class Dev(Configuration):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+            "LOCATION": os.getenv('REDIS_URL', 'redis://redis:6379/1'),
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
@@ -347,6 +347,7 @@ class Dev(Configuration):
     # Dynamically configure INTERNAL_IPS for Django Debug Toolbar
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = ['127.0.0.1', '::1'] + [ip[: ip.rfind('.') + 1] + '1' for ip in ips]
+
 
 class Prod(Dev):
     DEBUG = False

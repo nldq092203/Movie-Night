@@ -1,0 +1,93 @@
+services:
+  # NGINX reverse proxy
+  nginx:
+    image: nginx:latest
+    container_name: ${NGINX_CONTAINER}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${NGINX_DEV}:/etc/nginx/nginx.conf:ro
+      - ${TLS_DIR}:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+
+  # Django Backend
+  web:
+    container_name: ${BACKEND_CONTAINER}
+    build:
+      context: ${ROOT_PROJECT}
+      dockerfile: ${DOCKERFILE_DEV} # Development-specific Dockerfile
+    user: "${DOCKER_UID}:${DOCKER_GID}"
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ${ROOT_PROJECT}:${ROOT_PROJECT}/app  
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  # Celery Worker
+  celery:
+    container_name: ${CELERY_WORKER_CONTAINER}
+    build:
+      context: ${ROOT_PROJECT}
+      dockerfile: ${DOCKERFILE_DEV}
+    user: "${DOCKER_UID}:${DOCKER_GID}"
+    command: >
+      sh -c "
+      celery -A movienight worker --loglevel=INFO"
+    volumes:
+      - ${ROOT_PROJECT}:${ROOT_PROJECT}/app
+    depends_on:
+      - web
+      - redis
+
+  # Celery Beat
+  celery-beat:
+    container_name: ${CELERY_BEAT_CONTAINER}
+    build:
+      context: ${ROOT_PROJECT}
+      dockerfile: ${DOCKERFILE_DEV} 
+    user: "${DOCKER_UID}:${DOCKER_GID}"
+    command: >
+      sh -c "
+      celery -A movienight beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    volumes:
+      - ${ROOT_PROJECT}:${ROOT_PROJECT}/app
+    depends_on:
+      - web
+      - redis
+
+  # PostgreSQL Database
+  db:
+    image: postgres:14-alpine
+    container_name: ${DATABASE_CONTAINER}
+    restart: always
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis
+  redis:
+    image: redis:6.2
+    container_name: ${REDIS_CONTAINER}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+    name: postgres_data
+  redis_data:
+    name: redis_data
