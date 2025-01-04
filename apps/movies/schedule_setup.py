@@ -19,7 +19,7 @@ def schedule_setup(sender, **kwargs):
     task, created = PeriodicTask.objects.get_or_create(
         name="Check movie start times every minute",
         interval=minute_schedule,
-        task='movies.tasks.notify_of_starting_soon',
+        task='apps.movies.tasks.notify_of_starting_soon',
         enabled=True
     )
     
