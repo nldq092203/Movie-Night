@@ -47,6 +47,9 @@ class Dev(Configuration):
     ]
     CSRF_TRUSTED_ORIGINS = [
         'https://web-production-5212b.up.railway.app', 
+        'https://localhost',    
+        'http://localhost',    
+        'https://127.0.0.1',  
     ]
     AUTH_USER_MODEL = "movienight_auth.User"
 
